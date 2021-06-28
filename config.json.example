@@ -1,3 +1,5 @@
 {
+    "port": 8888,
+    "callback": "http://localhost",
     "spotify_client_id": "<spotify client_id key>"
 }
