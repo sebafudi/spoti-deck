@@ -1,0 +1,8 @@
+{
+  "name": "spoti-deck",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/sebafudi/spoti-deck.git",
+  "author": "sebafudi <sebastianfudalej@gmail.com>",
+  "license": "MIT"
+}
