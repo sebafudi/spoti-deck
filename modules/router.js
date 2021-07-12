@@ -9,8 +9,8 @@ function createApplication() {
       let flag = 0;
       n(req, res, url)
       routes.forEach(path => {
-        console.log(path.path)
         if (path.path == url.pathname) {
+          console.log(path.path)
           res.write(path.text)
           flag = 1;
         }

@@ -4,5 +4,8 @@
   "main": "index.js",
   "repository": "https://github.com/sebafudi/spoti-deck.git",
   "author": "sebafudi <sebastianfudalej@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "got": "^11.8.2"
+  }
 }
