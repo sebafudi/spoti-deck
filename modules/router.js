@@ -3,11 +3,11 @@ module.exports = createApplication
 function createApplication() {
   let routes = [];
   return {
-    route: (req, res, n) => {
+    route: async (req, res, n) => {
       let url = new URL(req.url, req.protocol + '://' + req.headers.host + "/")
       res.writeHead(200, { "Content-Type": "text/html" })
       let flag = 0;
-      n(req, res, url)
+      await n(req, res, url)
       routes.forEach(path => {
         if (path.path == url.pathname) {
           console.log(path.path)
