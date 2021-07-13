@@ -2,11 +2,11 @@ const got = require('got')
 
 module.exports = createApplication
 
-function createApplication() {
+function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
   options = {
-    'clientSecret': '',
-    'redirectUri': '',
-    'clientId': ''
+    'clientSecret': clientSecret,
+    'redirectUri': redirectUri,
+    'clientId': clientId
   }
   function requestAccessToken(clientCode) {
     let authString = options.clientId + ':' + options.clientSecret
@@ -19,7 +19,7 @@ function createApplication() {
         // client_secret: options.clientSecret
       },
       headers: {
-        Authorization: 'Basic ' + Buffer.from(authString).toString('base64'),
+        Authorization: `Basic ${Buffer.from(authString).toString('base64')}`,
         'accept-encoding': '*',
       },
     })
@@ -39,6 +39,14 @@ function createApplication() {
         requestAccessToken(clientCode)
           .then(({ body }) => resolve(JSON.parse(body)))
           .catch(x => reject(x))
+      })
+    },
+    makeRequest(url, accessToken) {
+      return got(url, {
+        headers: {
+          Authorization: `Bearer  ${accessToken}`,
+          'accept-encoding': '*',
+        },
       })
     }
   }
