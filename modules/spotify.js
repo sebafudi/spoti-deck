@@ -4,9 +4,9 @@ module.exports = createApplication
 
 function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
   options = {
-    'clientSecret': clientSecret,
-    'redirectUri': redirectUri,
-    'clientId': clientId
+    clientSecret: clientSecret,
+    redirectUri: redirectUri,
+    clientId: clientId,
   }
   function requestAccessToken(clientCode) {
     let authString = options.clientId + ':' + options.clientSecret
@@ -38,7 +38,7 @@ function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
       return new Promise((resolve, reject) => {
         requestAccessToken(clientCode)
           .then(({ body }) => resolve(JSON.parse(body)))
-          .catch(x => reject(x))
+          .catch((x) => reject(x))
       })
     },
     makeRequest(url, accessToken) {
@@ -48,6 +48,6 @@ function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
           'accept-encoding': '*',
         },
       })
-    }
+    },
   }
 }

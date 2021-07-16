@@ -5,6 +5,10 @@
   "repository": "https://github.com/sebafudi/spoti-deck.git",
   "author": "sebafudi <sebastianfudalej@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js"
+  },
   "dependencies": {
     "got": "^11.8.2"
   }

@@ -6,24 +6,27 @@ const Spotify = require('./modules/spotify')
 router = Router()
 spotify = Spotify(config.spotify_client_secret, config.callback, config.spotify_client_id)
 
-router.addRoute('/', ({res, next}) => {
+router.addRoute('/', ({ res, next }) => {
   res.write('<a href="/login">login</a>')
   next()
 })
-router.addRoute('/login', ({res, next}) => {
-  let scopes = 'user-read-currently-playing';
+router.addRoute('/login', ({ res, next }) => {
+  let scopes = 'user-read-currently-playing'
   const authorization =
-    'https://accounts.spotify.com/authorize'
-    + '?response_type=code'
-    + '&client_id=' + config.spotify_client_id
-    + (scopes ? '&scope=' + encodeURIComponent(scopes) : '')
-    + '&redirect_uri=' + encodeURIComponent(config.callback)
-  res.writeHead(307, { 'Location': authorization })
+    'https://accounts.spotify.com/authorize' +
+    '?response_type=code' +
+    '&client_id=' +
+    config.spotify_client_id +
+    (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
+    '&redirect_uri=' +
+    encodeURIComponent(config.callback)
+  res.writeHead(307, { Location: authorization })
   next()
 })
-router.addRoute('/callback/', ({res, next, url}) => {
-  spotify.handleAccessToken(url.searchParams.get('code'))
-    .then(x => {
+router.addRoute('/callback/', ({ res, next, url }) => {
+  spotify
+    .handleAccessToken(url.searchParams.get('code'))
+    .then((x) => {
       spotify.makeRequest('https://api.spotify.com/v1/me/player/currently-playing', x.access_token).then((xx) => {
         let data = JSON.parse(xx.body)
         res.write('<head>')
@@ -36,13 +39,15 @@ router.addRoute('/callback/', ({res, next, url}) => {
         next()
       })
     })
-    .catch(err => {
-      console.log("error getting access token")
+    .catch((err) => {
+      console.log('error getting access token')
       res.write('<a href="/">main</a><br />')
       next()
     })
 })
 
-http.createServer(function (request, response) {
-  router.route(request, response)
-}).listen(config.port);
+http
+  .createServer(function (request, response) {
+    router.route(request, response)
+  })
+  .listen(config.port)
