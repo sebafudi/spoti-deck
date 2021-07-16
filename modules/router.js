@@ -7,7 +7,7 @@ function createApplication() {
       let url = new URL(req.url, req.protocol + '://' + req.headers.host + '/')
       res.writeHead(200, { 'Content-Type': 'text/html' })
       let flag = 0
-      for (path of routes) {
+      for (let path of routes) {
         if (path.path == url.pathname) {
           console.log(path.path)
           await new Promise((next) => {

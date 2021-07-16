@@ -3,7 +3,7 @@ const got = require('got')
 module.exports = createApplication
 
 function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
-  options = {
+  const options = {
     clientSecret: clientSecret,
     redirectUri: redirectUri,
     clientId: clientId,

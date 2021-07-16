@@ -3,8 +3,8 @@ const config = require('./modules/config')
 const Router = require('./modules/router')
 const Spotify = require('./modules/spotify')
 
-router = Router()
-spotify = Spotify(config.spotify_client_secret, config.callback, config.spotify_client_id)
+const router = Router()
+const spotify = Spotify(config.spotify_client_secret, config.callback, config.spotify_client_id)
 
 router.addRoute('/', ({ res, next }) => {
   res.write('<a href="/login">login</a>')
@@ -41,6 +41,7 @@ router.addRoute('/callback/', ({ res, next, url }) => {
     })
     .catch((err) => {
       console.log('error getting access token')
+      console.log(err)
       res.write('<a href="/">main</a><br />')
       next()
     })
