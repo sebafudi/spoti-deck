@@ -8,6 +8,7 @@ const spotify = Spotify(config.spotify_client_secret, config.callback, config.sp
 
 router.addRoute('/', ({ res, next }) => {
   res.write('<a href="/login">login</a>')
+  res.write('<br /><img src="/foo.png" alt="bar"width=200></img>')
   next()
 })
 router.addRoute('/login', ({ res, next }) => {
@@ -46,6 +47,8 @@ router.addRoute('/callback/', ({ res, next, url }) => {
       next()
     })
 })
+
+router.staticDir('./static/')
 
 http
   .createServer(function (request, response) {
