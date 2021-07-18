@@ -6,22 +6,30 @@ module.exports = createApplication
 function createApplication() {
   let staticPath
   let routes = []
+  function isStaticFile(pathname) {
+    pathname = fspath.join(staticPath, pathname)
+    if (fs.existsSync(pathname) && fs.lstatSync(pathname).isFile()) {
+      return true
+    } else {
+      return false
+    }
+  }
+
+  function serveStaticFile(url, res) {
+    let data = fs.readFileSync(fspath.join(staticPath, url.pathname))
+    if (data) {
+      res.writeHead(200, { 'Content-Type': 'image/png' })
+      res.write(data)
+    } else {
+      res.writeHead(404, 'Not found')
+    }
+    res.end()
+  }
   return {
     route: async (req, res) => {
       let url = new URL(req.url, req.protocol + '://' + req.headers.host + '/')
-      console.log(url.pathname)
-      if (
-        fs.existsSync(fspath.join(staticPath, url.pathname)) &&
-        fs.lstatSync(fspath.join(staticPath, url.pathname)).isFile()
-      ) {
-        let data = fs.readFileSync(fspath.join(staticPath, url.pathname))
-        if (data) {
-          res.writeHead(200, { 'Content-Type': 'image/png' })
-          res.write(data)
-        } else {
-          res.writeHead(404, 'Not found')
-        }
-        res.end()
+      if (isStaticFile(url.pathname)) {
+        serveStaticFile(url, res)
       } else {
         res.writeHead(200, { 'Content-Type': 'text/html' })
         let flag = 0
