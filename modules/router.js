@@ -14,6 +14,12 @@ function createApplication() {
     }
   }
 
+  function isPath(path) {
+    return routes.some((key) => {
+      return key.path == path
+    })
+  }
+
   function serveStaticFile(url, res, promiseArray) {
     promiseArray.push(
       fsPromise.readFile(fspath.join(staticPath, url.pathname)).then((data, err) => {
@@ -21,33 +27,39 @@ function createApplication() {
           res.writeHead(200, { 'Content-Type': 'image/png' })
           res.write(data)
         } else {
-          res.writeHead(404, 'Not found')
+          res.writeHead(500, 'Internal Server Error')
         }
       })
     )
   }
+  function servePath(req, res, url, promiseArray) {
+    res.writeHead(200, { 'Content-Type': 'text/html' })
+    for (let path of routes) {
+      if (path.path == url.pathname) {
+        promiseArray.push(
+          new Promise((next) => {
+            path.func(req, res, next, { url })
+          })
+        )
+      }
+    }
+  }
   return {
     route: (req, res) => {
+      let flag = 0
       let promiseArray = []
       let url = new URL(req.url, req.protocol + '://' + req.headers.host + '/')
+      console.log(url.pathname)
       if (isStaticFile(url.pathname)) {
+        flag = 1
         serveStaticFile(url, res, promiseArray)
-      } else {
-        res.writeHead(200, { 'Content-Type': 'text/html' })
-        let flag = 0
-        for (let path of routes) {
-          if (path.path == url.pathname) {
-            promiseArray.push(
-              new Promise((next) => {
-                path.func({ req, res, url, next })
-              })
-            )
-            flag = 1
-          }
-        }
-        if (flag === 0) {
-          res.writeHead(404, 'Not found')
-        }
+      }
+      if (isPath(url.pathname)) {
+        flag = 1
+        servePath(req, res, url, promiseArray)
+      }
+      if (flag === 0) {
+        res.writeHead(404, 'Not found')
       }
       Promise.all(promiseArray).then(() => {
         res.end()

@@ -6,12 +6,12 @@ const Spotify = require('./modules/spotify')
 const router = Router()
 const spotify = Spotify(config.spotify_client_secret, config.callback, config.spotify_client_id)
 
-router.addRoute('/', ({ res, next }) => {
+router.addRoute('/', (req, res, next) => {
   res.write('<a href="/login">login</a>')
   res.write('<br /><img src="/foo.png" alt="bar"width=200></img>')
   next()
 })
-router.addRoute('/login', ({ res, next }) => {
+router.addRoute('/login', (req, res, next) => {
   let scopes = 'user-read-currently-playing'
   const authorization =
     'https://accounts.spotify.com/authorize' +
@@ -24,7 +24,7 @@ router.addRoute('/login', ({ res, next }) => {
   res.writeHead(307, { Location: authorization })
   next()
 })
-router.addRoute('/callback/', ({ res, next, url }) => {
+router.addRoute('/callback/', (req, res, next, { url }) => {
   spotify
     .handleAccessToken(url.searchParams.get('code'))
     .then((x) => {
@@ -46,6 +46,11 @@ router.addRoute('/callback/', ({ res, next, url }) => {
       res.write('<a href="/">main</a><br />')
       next()
     })
+})
+
+router.addRoute('/foo.png', (req, res, next) => {
+  console.log('foo')
+  next()
 })
 
 router.staticDir('./static/')
