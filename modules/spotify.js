@@ -49,5 +49,12 @@ function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
         },
       })
     },
+    getUserInfo(accessToken) {
+      return new Promise((resolve, reject) => {
+        this.makeRequest('https://api.spotify.com/v1/me', accessToken)
+          .then(({ body }) => resolve(JSON.parse(body)))
+          .catch((err) => reject(err))
+      })
+    },
   }
 }

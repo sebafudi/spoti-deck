@@ -28,16 +28,20 @@ router.addRoute('/callback/', (req, res, next, { url }) => {
   spotify
     .handleAccessToken(url.searchParams.get('code'))
     .then((x) => {
-      spotify.makeRequest('https://api.spotify.com/v1/me/player/currently-playing', x.access_token).then((xx) => {
-        let data = JSON.parse(xx.body)
-        res.write('<head>')
-        res.write('<meta charset="UTF-8">')
-        res.write('</head>')
-        res.write('<body>')
-        res.write('<a href="/">main</a><br />')
-        res.write(`Now playing: <b>${data.item.name}</b> by <b>${data.item.artists[0].name}</b>`)
-        res.write('</body>')
-        next()
+      spotify.getUserInfo(x.access_token).then((userInfo) => {
+        console.log(userInfo)
+        spotify.makeRequest('https://api.spotify.com/v1/me/player/currently-playing', x.access_token).then((xx) => {
+          let data = JSON.parse(xx.body)
+          res.write('<head>')
+          res.write('<meta charset="UTF-8">')
+          res.write('</head>')
+          res.write('<body>')
+          res.write('<a href="/">main</a><br />')
+          res.write(`User: <b>${userInfo.id}</b><br />`)
+          res.write(`Now playing: <b>${data.item.name}</b> by <b>${data.item.artists[0].name}</b>`)
+          res.write('</body>')
+          next()
+        })
       })
     })
     .catch((err) => {
