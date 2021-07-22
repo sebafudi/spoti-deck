@@ -9,12 +9,12 @@ const spotify = Spotify(config.spotify_client_secret, config.callback, config.sp
 
 let userArray = []
 
-router.addRoute('/', (req, res, next) => {
+router.addRoute('/', (req, res, done) => {
   res.write('<a href="/login">login</a>')
   res.write('<br /><img src="/foo.png" alt="bar"width=200></img>')
-  next()
+  done()
 })
-router.addRoute('/login', (req, res, next) => {
+router.addRoute('/login', (req, res, done) => {
   let scopes = 'user-read-currently-playing'
   const authorization =
     'https://accounts.spotify.com/authorize' +
@@ -25,9 +25,9 @@ router.addRoute('/login', (req, res, next) => {
     '&redirect_uri=' +
     encodeURIComponent(config.callback)
   res.writeHead(307, { Location: authorization })
-  next()
+  done()
 })
-router.addRoute('/callback/', (req, res, next, { url }) => {
+router.addRoute('/callback/', (req, res, done, { url }) => {
   spotify
     .handleAccessToken(url.searchParams.get('code'))
     .then((x) => {
@@ -70,7 +70,7 @@ router.addRoute('/callback/', (req, res, next, { url }) => {
           )
           Promise.all(arr).then(() => {
             res.write('</body>')
-            next()
+            done()
           })
         })
         .catch((err) => {
@@ -81,13 +81,26 @@ router.addRoute('/callback/', (req, res, next, { url }) => {
       console.log('error getting access token')
       console.log(err)
       res.write('<a href="/">main</a><br />')
-      next()
+      done()
     })
 })
 
-router.addRoute('/foo.png', (req, res, next) => {
+router.addRoute('/foo.png', (req, res, done) => {
   console.log('foo')
-  next()
+  done()
+})
+
+router.addSyncRoute('/test', (req, res, next) => {
+  setTimeout(() => {
+    res.write('a')
+    next()
+  }, (Math.random() * 100) % 100)
+})
+router.addSyncRoute('/test', (req, res, next) => {
+  setTimeout(() => {
+    res.write('b')
+    next()
+  }, (Math.random() * 100) % 100)
 })
 
 router.staticDir('./static/')
