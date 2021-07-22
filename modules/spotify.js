@@ -52,7 +52,13 @@ function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
     getUserInfo(accessToken) {
       return new Promise((resolve, reject) => {
         this.makeRequest('https://api.spotify.com/v1/me', accessToken)
-          .then(({ body }) => resolve(JSON.parse(body)))
+          .then((response) => {
+            if (response.statusCode === 200) {
+              resolve(JSON.parse(response.body))
+            } else {
+              reject()
+            }
+          })
           .catch((err) => reject(err))
       })
     },
