@@ -62,5 +62,18 @@ function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
           .catch((err) => reject(err))
       })
     },
+    getUserPlayback(accessToken) {
+      return new Promise((resolve, reject) => {
+        this.makeRequest('https://api.spotify.com/v1/me/player/currently-playing', accessToken)
+          .then((response) => {
+            if (response.statusCode === 200) {
+              resolve(JSON.parse(response.body))
+            } else if (response.statusCode === 204) {
+              reject('No playback')
+            }
+          })
+          .catch((err) => reject(err))
+      })
+    },
   }
 }

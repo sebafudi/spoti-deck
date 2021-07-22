@@ -45,29 +45,33 @@ router.addRoute('/callback/', (req, res, next, { url }) => {
             user.id = userInfo.id
             userArray.push(user)
           }
-          spotify
-            .makeRequest('https://api.spotify.com/v1/me/player/currently-playing', user.access_token)
-            .then((xx) => {
-              res.write('<head>')
-              res.write('<meta charset="UTF-8">')
-              res.write('</head>')
-              res.write('<body>')
-              res.write('<a href="/">main</a><br />')
-              res.write(`User: <b>${user.id}</b><br />`)
-              if (xx.statusCode === 200) {
-                let data = JSON.parse(xx.body)
-                res.write(`Now playing type: <b>${data.currently_playing_type}</b><br />`)
-                if (data.currently_playing_type === 'track') {
-                  res.write(`Now playing: <b>${data.item.name}</b> by <b>${data.item.artists[0].name}</b>`)
+          let arr = []
+
+          res.write('<head>')
+          res.write('<meta charset="UTF-8">')
+          res.write('</head>')
+          res.write('<body>')
+          res.write('<a href="/">main</a><br />')
+          res.write(`User: <b>${user.id}</b><br />`)
+          arr.push(
+            spotify
+              .getUserPlayback(user.access_token)
+              .then((userPlayback) => {
+                res.write(`Now playing type: <b>${userPlayback.currently_playing_type}</b><br />`)
+                if (userPlayback.currently_playing_type === 'track') {
+                  res.write(
+                    `Now playing: <b>${userPlayback.item.name}</b> by <b>${userPlayback.item.artists[0].name}</b>`
+                  )
                 }
-              } else if (xx.statusCode === 204) {
-                res.write('Player not detected!')
-              } else {
-                res.write('Error occurred')
-              }
-              res.write('</body>')
-              next()
-            })
+              })
+              .catch((err) => {
+                if (err === 'No playback') res.write('No playback detected')
+              })
+          )
+          Promise.all(arr).then(() => {
+            res.write('</body>')
+            next()
+          })
         })
         .catch((err) => {
           console.log(err)
