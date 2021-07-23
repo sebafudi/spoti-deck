@@ -73,14 +73,14 @@ router.addRoute('/callback/', (req, res, done, { url }) => {
             done()
           })
         })
-        .catch((err) => {
-          console.log(err)
+        .catch(() => {
+          res.write('<a href="/">main</a><br />')
+          res.write('Error geting user info')
         })
     })
-    .catch((err) => {
-      console.log('error getting access token')
-      console.log(err)
+    .catch(() => {
       res.write('<a href="/">main</a><br />')
+      res.write('Error geting access token')
       done()
     })
 })
@@ -99,6 +99,12 @@ router.addSyncRoute('/test', (req, res, next) => {
 router.addSyncRoute('/test', (req, res, next) => {
   setTimeout(() => {
     res.write('b')
+    next()
+  }, (Math.random() * 100) % 100)
+})
+router.addRoute('/test', (req, res, next) => {
+  setTimeout(() => {
+    res.write('.')
     next()
   }, (Math.random() * 100) % 100)
 })
