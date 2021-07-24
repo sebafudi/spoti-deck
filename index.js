@@ -60,12 +60,13 @@ router.addRoute('/callback/', (req, res, done, { url }) => {
                 res.write(`Now playing type: <b>${userPlayback.currently_playing_type}</b><br />`)
                 if (userPlayback.currently_playing_type === 'track') {
                   res.write(
-                    `Now playing: <b>${userPlayback.item.name}</b> by <b>${userPlayback.item.artists[0].name}</b>`
+                    `Now playing: <b>${userPlayback.item.name}</b> by <b>${userPlayback.item.artists[0].name}</b><br />`
                   )
                 }
               })
               .catch((err) => {
-                if (err === 'No playback') res.write('No playback detected')
+                if (err === 204) res.write('No playback detected<br />')
+                else res.write('Error getting player info<br />')
               })
           )
           Promise.all(arr).then(() => {
@@ -75,12 +76,12 @@ router.addRoute('/callback/', (req, res, done, { url }) => {
         })
         .catch(() => {
           res.write('<a href="/">main</a><br />')
-          res.write('Error geting user info')
+          res.write('Error geting user info<br />')
         })
     })
     .catch(() => {
       res.write('<a href="/">main</a><br />')
-      res.write('Error geting access token')
+      res.write('Error geting access token<br />')
       done()
     })
 })

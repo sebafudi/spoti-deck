@@ -22,7 +22,7 @@ function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
           .requestAccessToken(clientCode, options)
           .then(({ statusCode, body }) => {
             if (statusCode === 200) resolve(JSON.parse(body))
-            else reject()
+            else reject(statusCode)
           })
           .catch((err) => reject(err))
       )
@@ -30,10 +30,10 @@ function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
     getUserInfo(accessToken) {
       return new Promise((resolve, reject) =>
         spotifyApi
-          .makeRequest('https://api.spotify.com/v1/me', accessToken)
+          .makeRequest('/v1/me', accessToken)
           .then(({ statusCode, body }) => {
             if (statusCode === 200) resolve(JSON.parse(body))
-            else reject()
+            else reject(statusCode)
           })
           .catch((err) => reject(err))
       )
@@ -41,10 +41,10 @@ function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
     getUserPlayback(accessToken) {
       return new Promise((resolve, reject) =>
         spotifyApi
-          .makeRequest('https://api.spotify.com/v1/me/player/currently-playing', accessToken)
+          .makeRequest('/v1/me/player/currently-playing', accessToken)
           .then(({ statusCode, body }) => {
             if (statusCode === 200) resolve(JSON.parse(body))
-            else if (statusCode === 204) reject('No playback')
+            else reject(statusCode)
           })
           .catch((err) => reject(err))
       )
