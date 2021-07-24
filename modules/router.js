@@ -1,6 +1,7 @@
 const fs = require('fs')
 const fsPromise = require('fs').promises
 const fspath = require('path')
+const mime = require('mime-types')
 
 function createApplication() {
   let staticPath
@@ -26,7 +27,7 @@ function createApplication() {
     promiseArray.push(
       fsPromise.readFile(fspath.join(staticPath, url.pathname)).then((data, err) => {
         if (!err) {
-          res.writeHead(200, { 'Content-Type': 'image/png' })
+          res.writeHead(200, { 'Content-Type': mime.lookup(url.pathname) })
           res.write(data)
         } else {
           res.writeHead(500, 'Internal Server Error')
