@@ -16,14 +16,10 @@ function createApplication() {
   }
 
   function isPath(path) {
-    return routes.some((key) => {
-      return key.path == path
-    })
+    return routes.some((key) => key.path === path)
   }
   function isSyncPath(path) {
-    return syncRoutes.some((key) => {
-      return key.path == path
-    })
+    return syncRoutes.some((key) => key.path === path)
   }
 
   function serveStaticFile(url, res, promiseArray) {
@@ -41,12 +37,8 @@ function createApplication() {
   function servePath(req, res, url, promiseArray) {
     res.writeHead(200, { 'Content-Type': 'text/html' })
     for (let path of routes) {
-      if (path.path == url.pathname) {
-        promiseArray.push(
-          new Promise((done) => {
-            path.func(req, res, done, { url })
-          })
-        )
+      if (path.path === url.pathname) {
+        promiseArray.push(new Promise((done) => path.func(req, res, done, { url })))
       }
     }
   }
@@ -54,9 +46,7 @@ function createApplication() {
     res.writeHead(200, { 'Content-Type': 'text/html' })
     for (let path of syncRoutes) {
       if (path.path == url.pathname) {
-        await new Promise((next) => {
-          path.func(req, res, next, { url })
-        })
+        await new Promise((next) => path.func(req, res, next, { url }))
       }
     }
   }
