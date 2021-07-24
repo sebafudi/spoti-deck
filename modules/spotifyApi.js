@@ -25,5 +25,13 @@ function makeRequest(url, accessToken) {
     },
   })
 }
+function put(url, accessToken) {
+  return got.put(new URL(url, apiAddress), {
+    headers: {
+      Authorization: `Bearer  ${accessToken}`,
+      'accept-encoding': '*',
+    },
+  })
+}
 
-module.exports = { requestAccessToken, makeRequest }
+module.exports = { requestAccessToken, makeRequest, put }

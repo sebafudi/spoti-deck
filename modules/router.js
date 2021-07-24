@@ -7,6 +7,7 @@ function createApplication() {
   let staticPath
   let routes = []
   let syncRoutes = []
+  let postRoutes = []
   function isStaticFile(pathname) {
     pathname = fspath.join(staticPath, pathname)
     if (fs.existsSync(pathname) && fs.lstatSync(pathname).isFile()) {
@@ -53,37 +54,49 @@ function createApplication() {
   }
   return {
     route: async (req, res) => {
-      let flag = 0
-      let promiseArray = []
-      let url = new URL(req.url, req.protocol + '://' + req.headers.host + '/')
-      console.log(url.pathname)
-      if (isStaticFile(url.pathname)) {
-        flag = 1
-        serveStaticFile(url, res, promiseArray)
-      }
-      if (isPath(url.pathname)) {
-        flag = 1
-        servePath(req, res, url, promiseArray)
-      }
-      if (isSyncPath(url.pathname)) {
-        flag = 1
-        await serveSyncPath(req, res, url, promiseArray)
-      }
-      Promise.all(promiseArray).then(() => {
-        if (flag === 0) {
-          res.writeHead(404, 'Not found')
+      if (req.method === 'GET') {
+        let flag = 0
+        let promiseArray = []
+        let url = new URL(req.url, req.protocol + '://' + req.headers.host + '/')
+        console.log(url.pathname)
+        if (isStaticFile(url.pathname)) {
+          flag = 1
+          serveStaticFile(url, res, promiseArray)
+        }
+        if (isPath(url.pathname)) {
+          flag = 1
+          servePath(req, res, url, promiseArray)
+        }
+        if (isSyncPath(url.pathname)) {
+          flag = 1
+          await serveSyncPath(req, res, url, promiseArray)
+        }
+        Promise.all(promiseArray).then(() => {
+          if (flag === 0) {
+            res.writeHead(404, 'Not found')
+          }
+          res.end()
+        })
+      } else if (req.method === 'POST') {
+        let url = new URL(req.url, req.protocol + '://' + req.headers.host + '/')
+        if (postRoutes.some((key) => key.path === url.pathname)) {
+          let func = postRoutes.find((key) => key.path === url.pathname)
+          await func.func(req, res)
         }
         res.end()
-      })
+      }
     },
-    addRoute: (path, func) => {
+    get: (path, func) => {
       routes.push({ path, func })
     },
-    addSyncRoute: (path, func) => {
+    getSync: (path, func) => {
       syncRoutes.push({ path, func })
     },
     staticDir: (path) => {
       staticPath = fspath.normalize(path)
+    },
+    post: (path, func) => {
+      postRoutes.push({ path, func })
     },
   }
 }

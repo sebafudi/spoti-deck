@@ -49,6 +49,28 @@ function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
           .catch((err) => reject(err))
       )
     },
+    pausePlayback(accessToken) {
+      return new Promise((resolve, reject) => {
+        spotifyApi
+          .put('/v1/me/player/pause', accessToken)
+          .then(({ statusCode }) => {
+            if (statusCode === 204) resolve()
+            else reject(statusCode)
+          })
+          .catch((err) => reject(err))
+      })
+    },
+    startPlayback(accessToken) {
+      return new Promise((resolve, reject) => {
+        spotifyApi
+          .put('/v1/me/player/play', accessToken)
+          .then(({ statusCode }) => {
+            if (statusCode === 204) resolve()
+            else reject(statusCode)
+          })
+          .catch((err) => reject(err))
+      })
+    },
   }
 }
 

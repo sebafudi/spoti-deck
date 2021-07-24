@@ -3,19 +3,71 @@ const config = require('./modules/config')
 const Router = require('./modules/router')
 const Spotify = require('./modules/spotify')
 const User = require('./modules/user')
+const crypto = require('crypto')
 
 const router = Router()
 const spotify = Spotify(config.spotify_client_secret, config.callback, config.spotify_client_id)
 
+const secret = 'keyboard cat'
+
 let userArray = []
 
-router.addRoute('/', (req, res, done) => {
+let devicesDB = []
+
+router.post('/api/token', async (req, res) => {
+  if (req.headers.authorization !== undefined) {
+    let token = crypto
+      .createHmac('sha256', secret)
+      .update(req.headers.authorization + crypto.randomBytes(0))
+      .digest('hex')
+    let reg = /(\S{4})$/gm
+
+    let uuid = reg.exec(req.headers.authorization)[0]
+    if (devicesDB.some((key) => key.uuid === uuid)) {
+      console.log('already registered')
+    } else {
+      devicesDB.push({ uuid, token })
+      res.write(`{token: ${token}}`)
+    }
+  } else {
+    res.writeHead(400, 'Bad Request')
+  }
+})
+
+router.post('/api/playback/pause', async (req, res) => {
+  if (req.headers.authorization !== undefined) {
+    if (req.headers.authorization === 'Bearer 675167aae18eafd70f8332c0cc8a298f78f44ef52454aae90562c3def465b099') {
+      console.log(userArray[0].access_token)
+      spotify
+        .pausePlayback(userArray[0].access_token)
+        .then(() => {
+          res.write('ok')
+        })
+        .catch((err) => console.log(err))
+    }
+  }
+})
+router.post('/api/playback/play', async (req, res) => {
+  if (req.headers.authorization !== undefined) {
+    if (req.headers.authorization === 'Bearer 675167aae18eafd70f8332c0cc8a298f78f44ef52454aae90562c3def465b099') {
+      console.log(userArray[0].access_token)
+      spotify
+        .startPlayback(userArray[0].access_token)
+        .then(() => {
+          res.write('ok')
+        })
+        .catch((err) => console.log(err))
+    }
+  }
+})
+
+router.get('/', (req, res, done) => {
   res.write('<a href="/login">login</a>')
   res.write('<br /><img src="/foo.png" alt="bar"width=200></img>')
   done()
 })
-router.addRoute('/login', (req, res, done) => {
-  let scopes = 'user-read-currently-playing'
+router.get('/login', (req, res, done) => {
+  let scopes = 'user-read-currently-playing user-modify-playback-state'
   const authorization =
     'https://accounts.spotify.com/authorize' +
     '?response_type=code' +
@@ -27,7 +79,7 @@ router.addRoute('/login', (req, res, done) => {
   res.writeHead(307, { Location: authorization })
   done()
 })
-router.addRoute('/callback/', (req, res, done, { url }) => {
+router.get('/callback/', (req, res, done, { url }) => {
   spotify
     .handleAccessToken(url.searchParams.get('code'))
     .then((x) => {
@@ -86,24 +138,24 @@ router.addRoute('/callback/', (req, res, done, { url }) => {
     })
 })
 
-router.addRoute('/foo.png', (req, res, done) => {
+router.get('/foo.png', (req, res, done) => {
   console.log('foo')
   done()
 })
 
-router.addSyncRoute('/test', (req, res, next) => {
+router.getSync('/test', (req, res, next) => {
   setTimeout(() => {
     res.write('a')
     next()
   }, (Math.random() * 100) % 100)
 })
-router.addSyncRoute('/test', (req, res, next) => {
+router.getSync('/test', (req, res, next) => {
   setTimeout(() => {
     res.write('b')
     next()
   }, (Math.random() * 100) % 100)
 })
-router.addRoute('/test', (req, res, next) => {
+router.get('/test', (req, res, next) => {
   setTimeout(() => {
     res.write('.')
     next()

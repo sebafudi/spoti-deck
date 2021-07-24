@@ -4,6 +4,7 @@ function user() {
     refresh_token: '',
     id: '',
   }
+  let devices = []
   return {
     get access_token() {
       return info.access_token
@@ -22,6 +23,9 @@ function user() {
     },
     set id(value) {
       info.id = value
+    },
+    addDevice: (id, mac) => {
+      devices.push({ id, mac })
     },
   }
 }
