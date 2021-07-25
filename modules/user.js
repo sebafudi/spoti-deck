@@ -24,8 +24,11 @@ function user() {
     set id(value) {
       info.id = value
     },
-    addDevice: (id, mac) => {
-      devices.push({ id, mac })
+    addDevice: (uuid, token) => {
+      devices.push({ uuid, token })
+    },
+    hasDeviceByToken: (token) => {
+      return devices.some((key) => key.token === token)
     },
   }
 }

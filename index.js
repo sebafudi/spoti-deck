@@ -8,56 +8,62 @@ const crypto = require('crypto')
 const router = Router()
 const spotify = Spotify(config.spotify_client_secret, config.callback, config.spotify_client_id)
 
-const secret = 'keyboard cat'
-
 let userArray = []
 
 let devicesDB = []
 
-router.post('/api/token', async (req, res) => {
-  if (req.headers.authorization !== undefined) {
-    let token = crypto
-      .createHmac('sha256', secret)
-      .update(req.headers.authorization + crypto.randomBytes(0))
-      .digest('hex')
-    let reg = /(\S{4})$/gm
+function createUserToken(uuid) {
+  let token = crypto
+    .createHmac('sha256', config.session_secret)
+    .update(uuid + crypto.randomBytes(16))
+    .digest('hex')
+  return token
+}
 
-    let uuid = reg.exec(req.headers.authorization)[0]
-    if (devicesDB.some((key) => key.uuid === uuid)) {
-      console.log('already registered')
-    } else {
-      devicesDB.push({ uuid, token })
-      res.write(`{token: ${token}}`)
-    }
-  } else {
-    res.writeHead(400, 'Bad Request')
-  }
-})
+function getTokenFromAuthString(str) {
+  let reg = /(\S{64})$/gm
+  return reg.exec(str)[0]
+}
+
+// router.post('/api/token', async (req, res) => {
+//   if (req.headers.authorization !== undefined) {
+//     let reg = /(\S{4})$/gm
+//     let uuid = reg.exec(req.headers.authorization)[0]
+//     if (devicesDB.some((key) => key.uuid === uuid)) {
+//       console.log('already registered')
+//     } else {
+//       devicesDB.push({ uuid, token })
+//       res.write(`{token: ${token}}`)
+//     }
+//   } else {
+//     res.writeHead(400, 'Bad Request')
+//   }
+// })
 
 router.post('/api/playback/pause', async (req, res) => {
   if (req.headers.authorization !== undefined) {
-    if (req.headers.authorization === 'Bearer 675167aae18eafd70f8332c0cc8a298f78f44ef52454aae90562c3def465b099') {
-      console.log(userArray[0].access_token)
-      spotify
-        .pausePlayback(userArray[0].access_token)
-        .then(() => {
-          res.write('ok')
-        })
-        .catch((err) => console.log(err))
-    }
+    let token = getTokenFromAuthString(req.headers.authorization)
+    let index = userArray.findIndex((user) => user.hasDeviceByToken(token))
+    spotify
+      .pausePlayback(userArray[index].access_token)
+      .then(() => {
+        console.log('ok')
+        res.write('ok')
+      })
+      .catch((err) => console.log(err))
   }
 })
 router.post('/api/playback/play', async (req, res) => {
   if (req.headers.authorization !== undefined) {
-    if (req.headers.authorization === 'Bearer 675167aae18eafd70f8332c0cc8a298f78f44ef52454aae90562c3def465b099') {
-      console.log(userArray[0].access_token)
-      spotify
-        .startPlayback(userArray[0].access_token)
-        .then(() => {
-          res.write('ok')
-        })
-        .catch((err) => console.log(err))
-    }
+    let token = getTokenFromAuthString(req.headers.authorization)
+    let index = userArray.findIndex((user) => user.hasDeviceByToken(token))
+    spotify
+      .startPlayback(userArray[index].access_token)
+      .then(() => {
+        console.log('ok')
+        res.write('ok')
+      })
+      .catch((err) => console.log(err))
   }
 })
 
@@ -96,6 +102,18 @@ router.get('/callback/', (req, res, done, { url }) => {
             user.refresh_token = x.refresh_token
             user.id = userInfo.id
             userArray.push(user)
+          }
+          let uuid = '1234'
+          req.cookie
+          res.setHeader
+          let token = createUserToken(uuid)
+          if (devicesDB.some((key) => key.uuid === uuid)) {
+            console.log('already registered')
+          } else {
+            user.addDevice(uuid, token)
+            console.log('lol')
+            devicesDB.push({ uuid, token })
+            res.write(`token: ${token}<br />`)
           }
           let arr = []
 
