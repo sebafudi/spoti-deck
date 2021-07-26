@@ -25,10 +25,11 @@ function createApplication() {
   }
 
   function serveStaticFile(url, res, promiseArray) {
+    let path = url.pathname === '/' ? '/index.html' : url.pathname
     promiseArray.push(
-      fsPromise.readFile(fspath.join(staticPath, url.pathname)).then((data, err) => {
+      fsPromise.readFile(fspath.join(staticPath, path)).then((data, err) => {
         if (!err) {
-          res.writeHead(200, { 'Content-Type': mime.lookup(url.pathname) })
+          res.writeHead(200, { 'Content-Type': mime.lookup(path) })
           res.write(data)
         } else {
           res.writeHead(500, 'Internal Server Error')
@@ -58,11 +59,13 @@ function createApplication() {
         let flag = 0
         let promiseArray = []
         let url = new URL(req.url, req.protocol + '://' + req.headers.host + '/')
-        console.log(url.pathname)
-        if (isStaticFile(url.pathname)) {
+
+        if (isStaticFile(url.pathname) || (url.pathname == '/' && isStaticFile('/index.html'))) {
           flag = 1
           serveStaticFile(url, res, promiseArray)
         }
+        console.log(url.pathname)
+
         if (isPath(url.pathname)) {
           flag = 1
           servePath(req, res, url, promiseArray)

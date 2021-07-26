@@ -68,10 +68,9 @@ router.post('/api/playback/play', async (req, res) => {
 })
 
 router.get('/', (req, res, done) => {
-  res.write('<a href="/login">login</a>')
-  res.write('<br /><img src="/foo.png" alt="bar"width=200></img>')
   done()
 })
+
 router.get('/login', (req, res, done) => {
   let scopes = 'user-read-currently-playing user-modify-playback-state'
   const authorization =
