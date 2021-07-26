@@ -25,20 +25,31 @@ function getTokenFromAuthString(str) {
   return reg.exec(str)[0]
 }
 
-// router.post('/api/token', async (req, res) => {
-//   if (req.headers.authorization !== undefined) {
-//     let reg = /(\S{4})$/gm
-//     let uuid = reg.exec(req.headers.authorization)[0]
-//     if (devicesDB.some((key) => key.uuid === uuid)) {
-//       console.log('already registered')
-//     } else {
-//       devicesDB.push({ uuid, token })
-//       res.write(`{token: ${token}}`)
-//     }
-//   } else {
-//     res.writeHead(400, 'Bad Request')
-//   }
-// })
+router.post('/api/token', async (req, res) => {
+  const chunks = []
+  req.on('data', (chunk) => chunks.push(chunk))
+  await new Promise((done) => {
+    req.on('end', () => {
+      const data = JSON.parse(Buffer.concat(chunks).toString())
+      let token = createUserToken(data.uuid)
+      if (devicesDB.some((key) => key.uuid === data.uuid)) {
+        console.log('already registered')
+        done()
+      } else {
+        let user = userArray.find((key) => key.id === data.login)
+        if (user) {
+          user.addDevice(data.uuid, token)
+          devicesDB.push({ uuid: data.uuid, token })
+          res.write(`${token}`)
+          console.log('registered new device', data.uuid)
+        } else {
+          res.write('no user')
+        }
+        done()
+      }
+    })
+  })
+})
 
 router.post('/api/playback/pause', async (req, res) => {
   if (req.headers.authorization !== undefined) {
@@ -47,7 +58,6 @@ router.post('/api/playback/pause', async (req, res) => {
     spotify
       .pausePlayback(userArray[index].access_token)
       .then(() => {
-        console.log('ok')
         res.write('ok')
       })
       .catch((err) => console.log(err))
@@ -60,7 +70,6 @@ router.post('/api/playback/play', async (req, res) => {
     spotify
       .startPlayback(userArray[index].access_token)
       .then(() => {
-        console.log('ok')
         res.write('ok')
       })
       .catch((err) => console.log(err))
@@ -84,6 +93,7 @@ router.get('/login', (req, res, done) => {
   res.writeHead(307, { Location: authorization })
   done()
 })
+
 router.get('/callback/', (req, res, done, { url }) => {
   spotify
     .handleAccessToken(url.searchParams.get('code'))
@@ -101,18 +111,6 @@ router.get('/callback/', (req, res, done, { url }) => {
             user.refresh_token = x.refresh_token
             user.id = userInfo.id
             userArray.push(user)
-          }
-          let uuid = '1234'
-          req.cookie
-          res.setHeader
-          let token = createUserToken(uuid)
-          if (devicesDB.some((key) => key.uuid === uuid)) {
-            console.log('already registered')
-          } else {
-            user.addDevice(uuid, token)
-            console.log('lol')
-            devicesDB.push({ uuid, token })
-            res.write(`token: ${token}<br />`)
           }
           let arr = []
 

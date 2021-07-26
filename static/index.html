@@ -1,12 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>spoti-deck</title>
-</head>
-<body>
-  test
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>spoti-deck</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        justify-content: center;
+      }
+      .box {
+        padding: 10px;
+      }
+      .full-width {
+        width: 100%;
+      }
+      .center {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="full-width center">spoti-deck</h1>
+      <h3 class="full-width center">Website</h3>
+      <div class="container">
+        <div class="box">
+          <a href="/login"><button>Login</button></a>
+        </div>
+      </div>
+      <h3 class="full-width center">Device</h3>
+      <div class="container">
+        <div class="container">
+          <div class="box">
+            <input type="text" class="uuidInput" />
+            <button onclick="setUuid()">SET UUID</button>
+          </div>
+          <div class="box">
+            <input type="text" class="loginInput" />
+            <button onclick="setLogin()">SET LOGIN</button>
+          </div>
+          <div class="box"><button onclick="getToken()">Register device</button></div>
+        </div>
+        <div class="container">
+          <div class="box">
+            <input type="text" placeholder="token" class="tokenInput" />
+            <button onclick="setToken()">SET TOKEN</button>
+          </div>
+        </div>
+        <div class="container">
+          <div class="box"><button onclick="play()">Play</button></div>
+          <div class="box"><button onclick="pause()">Pause</button></div>
+        </div>
+      </div>
+    </div>
+    <script src="/app.js"></script>
+  </body>
 </html>
