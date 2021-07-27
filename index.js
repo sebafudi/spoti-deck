@@ -2,13 +2,12 @@ const http = require('http')
 const config = require('./modules/config')
 const Router = require('./modules/router')
 const Spotify = require('./modules/spotify')
-const User = require('./modules/user')
+const UserDB = require('./modules/userDB')
 const crypto = require('crypto')
 
 const router = Router()
 const spotify = Spotify(config.spotify_client_secret, config.callback, config.spotify_client_id)
-
-let userArray = []
+const userDB = UserDB()
 
 let devicesDB = []
 
@@ -36,7 +35,7 @@ router.post('/api/token', async (req, res) => {
         console.log('already registered')
         done()
       } else {
-        let user = userArray.find((key) => key.id === data.login)
+        let user = userDB.findUserById(data.login)
         if (user) {
           user.addDevice(data.uuid, token)
           devicesDB.push({ uuid: data.uuid, token })
@@ -54,9 +53,9 @@ router.post('/api/token', async (req, res) => {
 router.post('/api/playback/pause', async (req, res) => {
   if (req.headers.authorization !== undefined) {
     let token = getTokenFromAuthString(req.headers.authorization)
-    let index = userArray.findIndex((user) => user.hasDeviceByToken(token))
+    let user = userDB.findUserByToken(token)
     spotify
-      .pausePlayback(userArray[index].access_token)
+      .pausePlayback(user.access_token)
       .then(() => {
         res.write('ok')
       })
@@ -66,9 +65,9 @@ router.post('/api/playback/pause', async (req, res) => {
 router.post('/api/playback/play', async (req, res) => {
   if (req.headers.authorization !== undefined) {
     let token = getTokenFromAuthString(req.headers.authorization)
-    let index = userArray.findIndex((user) => user.hasDeviceByToken(token))
+    let user = userDB.findUserByToken(token)
     spotify
-      .startPlayback(userArray[index].access_token)
+      .startPlayback(user.access_token)
       .then(() => {
         res.write('ok')
       })
@@ -101,16 +100,13 @@ router.get('/callback/', (req, res, done, { url }) => {
       spotify
         .getUserInfo(x.access_token)
         .then((userInfo) => {
-          let user = userArray.find((key) => key.id === userInfo.id)
+          let user = userDB.findUserById(userInfo.id)
           if (user) {
             console.log('user already in db')
           } else {
             console.log('user not in db')
-            user = new User()
-            user.access_token = x.access_token
-            user.refresh_token = x.refresh_token
-            user.id = userInfo.id
-            userArray.push(user)
+            let xxx = userDB.newUser(userInfo.id, x.access_token, x.refresh_token)
+            console.log(xxx)
           }
           let arr = []
 
@@ -138,6 +134,7 @@ router.get('/callback/', (req, res, done, { url }) => {
           )
           Promise.all(arr).then(() => {
             res.write('</body>')
+            console.log('done')
             done()
           })
         })
