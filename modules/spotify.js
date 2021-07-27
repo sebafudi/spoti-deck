@@ -16,13 +16,13 @@ function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
     set clientId(value) {
       options.clientId = value
     },
-    handleAccessToken(clientCode) {
+    async handleAccessToken(clientCode) {
       return new Promise((resolve, reject) =>
         spotifyApi
           .requestAccessToken(clientCode, options)
-          .then(({ statusCode, body }) => {
+          .then(({ statusCode, body, statusMessage }) => {
             if (statusCode === 200) resolve(JSON.parse(body))
-            else reject(statusCode)
+            else reject(statusCode + ' ' + statusMessage)
           })
           .catch((err) => reject(err))
       )
@@ -31,9 +31,9 @@ function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
       return new Promise((resolve, reject) =>
         spotifyApi
           .makeRequest('/v1/me', accessToken)
-          .then(({ statusCode, body }) => {
+          .then(({ statusCode, body, statusMessage }) => {
             if (statusCode === 200) resolve(JSON.parse(body))
-            else reject(statusCode)
+            else reject(statusCode + ' ' + statusMessage)
           })
           .catch((err) => reject(err))
       )
@@ -42,9 +42,9 @@ function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
       return new Promise((resolve, reject) =>
         spotifyApi
           .makeRequest('/v1/me/player/currently-playing', accessToken)
-          .then(({ statusCode, body }) => {
+          .then(({ statusCode, body, statusMessage }) => {
             if (statusCode === 200) resolve(JSON.parse(body))
-            else reject(statusCode)
+            else reject(statusCode + ' ' + statusMessage)
           })
           .catch((err) => reject(err))
       )
@@ -53,9 +53,9 @@ function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
       return new Promise((resolve, reject) => {
         spotifyApi
           .put('/v1/me/player/pause', accessToken)
-          .then(({ statusCode }) => {
+          .then(({ statusCode, statusMessage }) => {
             if (statusCode === 204) resolve()
-            else reject(statusCode)
+            else reject(statusCode + ' ' + statusMessage)
           })
           .catch((err) => reject(err))
       })
@@ -64,9 +64,9 @@ function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
       return new Promise((resolve, reject) => {
         spotifyApi
           .put('/v1/me/player/play', accessToken)
-          .then(({ statusCode }) => {
+          .then(({ statusCode, statusMessage }) => {
             if (statusCode === 204) resolve()
-            else reject(statusCode)
+            else reject(statusCode + ' ' + statusMessage)
           })
           .catch((err) => reject(err))
       })

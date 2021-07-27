@@ -54,24 +54,24 @@ router.post('/api/playback/pause', async (req, res) => {
   if (req.headers.authorization !== undefined) {
     let token = getTokenFromAuthString(req.headers.authorization)
     let user = userDB.findUserByToken(token)
-    spotify
-      .pausePlayback(user.access_token)
-      .then(() => {
-        res.write('ok')
-      })
-      .catch((err) => console.log(err))
+    try {
+      await spotify.pausePlayback(user.access_token)
+      res.write('ok')
+    } catch (err) {
+      console.log(err)
+    }
   }
 })
 router.post('/api/playback/play', async (req, res) => {
   if (req.headers.authorization !== undefined) {
     let token = getTokenFromAuthString(req.headers.authorization)
     let user = userDB.findUserByToken(token)
-    spotify
-      .startPlayback(user.access_token)
-      .then(() => {
-        res.write('ok')
-      })
-      .catch((err) => console.log(err))
+    try {
+      await spotify.startPlayback(user.access_token)
+      res.write('ok')
+    } catch (err) {
+      console.log(err)
+    }
   }
 })
 
@@ -93,61 +93,49 @@ router.get('/login', (req, res, done) => {
   done()
 })
 
-router.get('/callback/', (req, res, done, { url }) => {
-  spotify
-    .handleAccessToken(url.searchParams.get('code'))
-    .then((x) => {
-      spotify
-        .getUserInfo(x.access_token)
-        .then((userInfo) => {
-          let user = userDB.findUserById(userInfo.id)
-          if (user) {
-            console.log('user already in db')
-          } else {
-            console.log('user not in db')
-            let xxx = userDB.newUser(userInfo.id, x.access_token, x.refresh_token)
-            console.log(xxx)
+router.get('/callback/', async (req, res, done, { url }) => {
+  res.write('<head>')
+  res.write('<meta charset="UTF-8">')
+  res.write('</head>')
+  res.write('<body>')
+  res.write('<a href="/">main</a><br />')
+  try {
+    let userCode = await spotify.handleAccessToken(url.searchParams.get('code'))
+    let userInfo = await spotify.getUserInfo(userCode.access_token)
+    let user = userDB.findUserById(userInfo.id)
+    if (user) {
+      console.log('user already in db')
+    } else {
+      console.log('user not in db')
+      user = userDB.newUser(userInfo.id, userCode.access_token, userCode.refresh_token)
+    }
+    res.write(`User: <b>${user.id}</b><br />`)
+    Promise.all([
+      (async () => {
+        try {
+          let userPlayback = await spotify.getUserPlayback(user.access_token)
+          res.write(`Now playing type: <b>${userPlayback.currently_playing_type}</b><br />`)
+          if (userPlayback.currently_playing_type === 'track') {
+            res.write(
+              `Now playing: <b>${userPlayback.item.name}</b> by <b>${userPlayback.item.artists[0].name}</b><br />`
+            )
           }
-          let arr = []
-
-          res.write('<head>')
-          res.write('<meta charset="UTF-8">')
-          res.write('</head>')
-          res.write('<body>')
-          res.write('<a href="/">main</a><br />')
-          res.write(`User: <b>${user.id}</b><br />`)
-          arr.push(
-            spotify
-              .getUserPlayback(user.access_token)
-              .then((userPlayback) => {
-                res.write(`Now playing type: <b>${userPlayback.currently_playing_type}</b><br />`)
-                if (userPlayback.currently_playing_type === 'track') {
-                  res.write(
-                    `Now playing: <b>${userPlayback.item.name}</b> by <b>${userPlayback.item.artists[0].name}</b><br />`
-                  )
-                }
-              })
-              .catch((err) => {
-                if (err === 204) res.write('No playback detected<br />')
-                else res.write('Error getting player info<br />')
-              })
-          )
-          Promise.all(arr).then(() => {
-            res.write('</body>')
-            console.log('done')
-            done()
-          })
-        })
-        .catch(() => {
-          res.write('<a href="/">main</a><br />')
-          res.write('Error geting user info<br />')
-        })
-    })
-    .catch(() => {
-      res.write('<a href="/">main</a><br />')
-      res.write('Error geting access token<br />')
-      done()
-    })
+          res.write('</body>')
+          done()
+        } catch (err) {
+          res.write('Error occoured<br />')
+          res.write(err.toString())
+          res.write('</body>')
+          done()
+        }
+      })(),
+    ])
+  } catch (err) {
+    res.write('Error occoured<br />')
+    res.write(err.toString())
+    res.write('</body>')
+    done()
+  }
 })
 
 router.get('/foo.png', (req, res, done) => {
