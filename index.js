@@ -6,7 +6,11 @@ const UserDB = require('./modules/userDB')
 const crypto = require('crypto')
 
 const router = Router()
-const spotify = Spotify(config.spotify_client_secret, config.callback, config.spotify_client_id)
+const spotify = Spotify({
+  clientSecret: config.spotify_client_secret,
+  redirectUri: config.callback,
+  clientId: config.spotify_client_id,
+})
 const userDB = UserDB()
 
 let devicesDB = []

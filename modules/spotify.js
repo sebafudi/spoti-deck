@@ -1,21 +1,26 @@
 const spotifyApi = require('./spotifyApi')
 
-function createApplication(clientSecret = '', redirectUri = '', clientId = '') {
-  const options = {
-    clientSecret,
-    redirectUri,
-    clientId,
+function unsetError(options) {
+  if (options instanceof Object) {
+    console.log(options)
+    Object.keys(options).forEach((element) => {
+      if (options[element] === undefined) {
+        throw new Error(`${element} option must be set!`)
+      }
+    })
+  } else {
+    throw new Error('Must be an object')
   }
+}
+
+function createApplication(options) {
+  // this.options = Object.assign({}, options)
+  unsetError({
+    clientSecret: options.clientSecret,
+    redirectUri: options.redirectUri,
+    clientId: options.clientId,
+  })
   return {
-    set clientSecret(value) {
-      options.clientSecret = value
-    },
-    set redirectUri(value) {
-      options.redirectUri = value
-    },
-    set clientId(value) {
-      options.clientId = value
-    },
     async handleAccessToken(clientCode) {
       return new Promise((resolve, reject) =>
         spotifyApi
