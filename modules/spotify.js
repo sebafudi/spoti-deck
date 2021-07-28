@@ -2,7 +2,6 @@ const spotifyApi = require('./spotifyApi')
 
 function unsetError(options) {
   if (options instanceof Object) {
-    console.log(options)
     Object.keys(options).forEach((element) => {
       if (options[element] === undefined) {
         throw new Error(`${element} option must be set!`)
@@ -10,6 +9,33 @@ function unsetError(options) {
     })
   } else {
     throw new Error('Must be an object')
+  }
+}
+
+function requestFactory(uri, expectedStatusCode, accessToken) {
+  return {
+    get: () => {
+      return new Promise((resolve, reject) =>
+        spotifyApi
+          .makeRequest(uri, accessToken)
+          .then(({ statusCode, body, statusMessage }) => {
+            if (statusCode === expectedStatusCode) resolve(JSON.parse(body))
+            else reject(statusCode + ' ' + statusMessage)
+          })
+          .catch((err) => reject(err))
+      )
+    },
+    put: () => {
+      return new Promise((resolve, reject) =>
+        spotifyApi
+          .put(uri, accessToken)
+          .then(({ statusCode, statusMessage }) => {
+            if (statusCode === expectedStatusCode) resolve()
+            else reject(statusCode + ' ' + statusMessage)
+          })
+          .catch((err) => reject(err))
+      )
+    },
   }
 }
 
@@ -33,48 +59,16 @@ function createApplication(options) {
       )
     },
     getUserInfo(accessToken) {
-      return new Promise((resolve, reject) =>
-        spotifyApi
-          .makeRequest('/v1/me', accessToken)
-          .then(({ statusCode, body, statusMessage }) => {
-            if (statusCode === 200) resolve(JSON.parse(body))
-            else reject(statusCode + ' ' + statusMessage)
-          })
-          .catch((err) => reject(err))
-      )
+      return requestFactory('/v1/me', 200, accessToken).get()
     },
     getUserPlayback(accessToken) {
-      return new Promise((resolve, reject) =>
-        spotifyApi
-          .makeRequest('/v1/me/player/currently-playing', accessToken)
-          .then(({ statusCode, body, statusMessage }) => {
-            if (statusCode === 200) resolve(JSON.parse(body))
-            else reject(statusCode + ' ' + statusMessage)
-          })
-          .catch((err) => reject(err))
-      )
+      return requestFactory('/v1/me/player/currently-playing', 200, accessToken).get()
     },
     pausePlayback(accessToken) {
-      return new Promise((resolve, reject) => {
-        spotifyApi
-          .put('/v1/me/player/pause', accessToken)
-          .then(({ statusCode, statusMessage }) => {
-            if (statusCode === 204) resolve()
-            else reject(statusCode + ' ' + statusMessage)
-          })
-          .catch((err) => reject(err))
-      })
+      return requestFactory('/v1/me/player/pause', 204, accessToken).put()
     },
     startPlayback(accessToken) {
-      return new Promise((resolve, reject) => {
-        spotifyApi
-          .put('/v1/me/player/play', accessToken)
-          .then(({ statusCode, statusMessage }) => {
-            if (statusCode === 204) resolve()
-            else reject(statusCode + ' ' + statusMessage)
-          })
-          .catch((err) => reject(err))
-      })
+      return requestFactory('/v1/me/player/play', 204, accessToken).put()
     },
   }
 }
