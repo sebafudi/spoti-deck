@@ -166,8 +166,6 @@ router.get('/test', (req, res, next) => {
   }, (Math.random() * 100) % 100)
 })
 
-router.staticDir('./static/')
-
 http
   .createServer(function (request, response) {
     router.route(request, response)

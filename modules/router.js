@@ -3,13 +3,18 @@ const fsPromise = require('fs').promises
 const fspath = require('path')
 const mime = require('mime-types')
 
-function createApplication() {
-  let staticPath
+function createApplication(options) {
+  this.options = Object.assign(
+    {
+      staticPath: './static/',
+    },
+    options
+  )
   let routes = []
   let syncRoutes = []
   let postRoutes = []
   function isStaticFile(pathname) {
-    pathname = fspath.join(staticPath, pathname)
+    pathname = fspath.join(this.options.staticPath, pathname)
     if (fs.existsSync(pathname) && fs.lstatSync(pathname).isFile()) {
       return true
     } else {
@@ -27,7 +32,7 @@ function createApplication() {
   function serveStaticFile(url, res, promiseArray) {
     let path = url.pathname === '/' ? '/index.html' : url.pathname
     promiseArray.push(
-      fsPromise.readFile(fspath.join(staticPath, path)).then((data, err) => {
+      fsPromise.readFile(fspath.join(this.options.staticPath, path)).then((data, err) => {
         if (!err) {
           res.writeHead(200, { 'Content-Type': mime.lookup(path) })
           res.write(data)
@@ -94,9 +99,6 @@ function createApplication() {
     },
     getSync: (path, func) => {
       syncRoutes.push({ path, func })
-    },
-    staticDir: (path) => {
-      staticPath = fspath.normalize(path)
     },
     post: (path, func) => {
       postRoutes.push({ path, func })
