@@ -40,37 +40,35 @@ function requestFactory(uri, expectedStatusCode, accessToken) {
 }
 
 function createApplication(options) {
-  // this.options = Object.assign({}, options)
   unsetError({
     clientSecret: options.clientSecret,
     redirectUri: options.redirectUri,
     clientId: options.clientId,
   })
-  return {
-    async handleAccessToken(clientCode) {
-      return new Promise((resolve, reject) =>
-        spotifyApi
-          .requestAccessToken(clientCode, options)
-          .then(({ statusCode, body, statusMessage }) => {
-            if (statusCode === 200) resolve(JSON.parse(body))
-            else reject(statusCode + ' ' + statusMessage)
-          })
-          .catch((err) => reject(err))
-      )
-    },
-    getUserInfo(accessToken) {
-      return requestFactory('/v1/me', 200, accessToken).get()
-    },
-    getUserPlayback(accessToken) {
-      return requestFactory('/v1/me/player/currently-playing', 200, accessToken).get()
-    },
-    pausePlayback(accessToken) {
-      return requestFactory('/v1/me/player/pause', 204, accessToken).put()
-    },
-    startPlayback(accessToken) {
-      return requestFactory('/v1/me/player/play', 204, accessToken).put()
-    },
+  const handleAccessToken = async (clientCode) => {
+    return new Promise((resolve, reject) =>
+      spotifyApi
+        .requestAccessToken(clientCode, options)
+        .then(({ statusCode, body, statusMessage }) => {
+          if (statusCode === 200) resolve(JSON.parse(body))
+          else reject(statusCode + ' ' + statusMessage)
+        })
+        .catch((err) => reject(err))
+    )
   }
+  const getUserInfo = (accessToken) => {
+    return requestFactory('/v1/me', 200, accessToken).get()
+  }
+  const getUserPlayback = (accessToken) => {
+    return requestFactory('/v1/me/player/currently-playing', 200, accessToken).get()
+  }
+  const pausePlayback = (accessToken) => {
+    return requestFactory('/v1/me/player/pause', 204, accessToken).put()
+  }
+  const startPlayback = (accessToken) => {
+    return requestFactory('/v1/me/player/play', 204, accessToken).put()
+  }
+  return { handleAccessToken, getUserInfo, getUserPlayback, pausePlayback, startPlayback }
 }
 
 module.exports = createApplication

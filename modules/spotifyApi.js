@@ -3,7 +3,7 @@ const got = require('got')
 const tokenApiAddress = 'https://accounts.spotify.com'
 const apiAddress = 'https://api.spotify.com'
 
-function requestAccessToken(clientCode, options) {
+const requestAccessToken = (clientCode, options) => {
   let authString = options.clientId + ':' + options.clientSecret
   return got.post(new URL('/api/token', tokenApiAddress), {
     form: {
@@ -17,7 +17,7 @@ function requestAccessToken(clientCode, options) {
     },
   })
 }
-function makeRequest(url, accessToken) {
+const makeRequest = (url, accessToken) => {
   return got(new URL(url, apiAddress), {
     headers: {
       Authorization: `Bearer  ${accessToken}`,
@@ -25,7 +25,7 @@ function makeRequest(url, accessToken) {
     },
   })
 }
-function put(url, accessToken) {
+const put = (url, accessToken) => {
   return got.put(new URL(url, apiAddress), {
     headers: {
       Authorization: `Bearer  ${accessToken}`,

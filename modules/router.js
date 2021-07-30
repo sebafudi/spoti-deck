@@ -4,7 +4,7 @@ const fspath = require('path')
 const mime = require('mime-types')
 
 function createApplication(options) {
-  this.options = Object.assign(
+  options = Object.assign(
     {
       staticPath: './static/',
     },
@@ -13,8 +13,8 @@ function createApplication(options) {
   let routes = []
   let syncRoutes = []
   let postRoutes = []
-  function isStaticFile(pathname) {
-    pathname = fspath.join(this.options.staticPath, pathname)
+  const _isStaticFile = (pathname) => {
+    pathname = fspath.join(options.staticPath, pathname)
     if (fs.existsSync(pathname) && fs.lstatSync(pathname).isFile()) {
       return true
     } else {
@@ -22,17 +22,17 @@ function createApplication(options) {
     }
   }
 
-  function isPath(path) {
+  const _isPath = (path) => {
     return routes.some((key) => key.path === path)
   }
-  function isSyncPath(path) {
+  const _isSyncPath = (path) => {
     return syncRoutes.some((key) => key.path === path)
   }
 
-  function serveStaticFile(url, res, promiseArray) {
+  const _serveStaticFile = (url, res, promiseArray) => {
     let path = url.pathname === '/' ? '/index.html' : url.pathname
     promiseArray.push(
-      fsPromise.readFile(fspath.join(this.options.staticPath, path)).then((data, err) => {
+      fsPromise.readFile(fspath.join(options.staticPath, path)).then((data, err) => {
         if (!err) {
           res.writeHead(200, { 'Content-Type': mime.lookup(path) })
           res.write(data)
@@ -42,7 +42,7 @@ function createApplication(options) {
       })
     )
   }
-  function servePath(req, res, url, promiseArray) {
+  const _servePath = (req, res, url, promiseArray) => {
     res.writeHead(200, { 'Content-Type': 'text/html' })
     for (let path of routes) {
       if (path.path === url.pathname) {
@@ -50,7 +50,7 @@ function createApplication(options) {
       }
     }
   }
-  async function serveSyncPath(req, res, url) {
+  const _serveSyncPath = async (req, res, url) => {
     res.writeHead(200, { 'Content-Type': 'text/html' })
     for (let path of syncRoutes) {
       if (path.path == url.pathname) {
@@ -65,19 +65,19 @@ function createApplication(options) {
         let promiseArray = []
         let url = new URL(req.url, req.protocol + '://' + req.headers.host + '/')
 
-        if (isStaticFile(url.pathname) || (url.pathname == '/' && isStaticFile('/index.html'))) {
+        if (_isStaticFile(url.pathname) || (url.pathname == '/' && _isStaticFile('/index.html'))) {
           flag = 1
-          serveStaticFile(url, res, promiseArray)
+          _serveStaticFile(url, res, promiseArray)
         }
         console.log(url.pathname)
 
-        if (isPath(url.pathname)) {
+        if (_isPath(url.pathname)) {
           flag = 1
-          servePath(req, res, url, promiseArray)
+          _servePath(req, res, url, promiseArray)
         }
-        if (isSyncPath(url.pathname)) {
+        if (_isSyncPath(url.pathname)) {
           flag = 1
-          await serveSyncPath(req, res, url, promiseArray)
+          await _serveSyncPath(req, res, url, promiseArray)
         }
         Promise.all(promiseArray).then(() => {
           if (flag === 0) {
