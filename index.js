@@ -15,8 +15,6 @@ const spotify = Spotify({
 const mongodb = Mongodb({ uri: config.mongodb_uri })
 const userDB = UserDB(mongodb)
 
-let devicesDB = []
-
 function createUserToken(uuid) {
   let token = crypto
     .createHmac('sha256', config.session_secret)
@@ -46,7 +44,6 @@ router.post('/api/token', async (req, res) => {
         if (user) {
           user.addDevice(data.uuid, token)
           userDB.addDeviceById(user.id, { uuid: data.uuid, token })
-          devicesDB.push({ uuid: data.uuid, token })
           res.write(`${token}`)
           console.log('registered new device', data.uuid)
         } else {
