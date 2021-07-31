@@ -3,6 +3,7 @@ const config = require('./modules/config')
 const Router = require('./modules/router')
 const Spotify = require('./modules/spotify')
 const UserDB = require('./modules/userDB')
+const Mongodb = require('./modules/mongodb')
 const crypto = require('crypto')
 
 const router = Router()
@@ -11,7 +12,8 @@ const spotify = Spotify({
   redirectUri: config.callback,
   clientId: config.spotify_client_id,
 })
-const userDB = UserDB()
+const mongodb = Mongodb({ uri: config.mongodb_uri })
+const userDB = UserDB(mongodb)
 
 let devicesDB = []
 
@@ -32,16 +34,18 @@ router.post('/api/token', async (req, res) => {
   const chunks = []
   req.on('data', (chunk) => chunks.push(chunk))
   await new Promise((done) => {
-    req.on('end', () => {
+    req.on('end', async () => {
       const data = JSON.parse(Buffer.concat(chunks).toString())
       let token = createUserToken(data.uuid)
-      if (devicesDB.some((key) => key.uuid === data.uuid)) {
+      if (await userDB.findUserByUuid(data.uuid)) {
         console.log('already registered')
         done()
       } else {
-        let user = userDB.findUserById(data.login)
+        let user = await userDB.findUserById(data.login)
+        console.log(user)
         if (user) {
           user.addDevice(data.uuid, token)
+          userDB.addDeviceById(user.id, { uuid: data.uuid, token })
           devicesDB.push({ uuid: data.uuid, token })
           res.write(`${token}`)
           console.log('registered new device', data.uuid)
@@ -57,7 +61,7 @@ router.post('/api/token', async (req, res) => {
 router.post('/api/playback/pause', async (req, res) => {
   if (req.headers.authorization !== undefined) {
     let token = getTokenFromAuthString(req.headers.authorization)
-    let user = userDB.findUserByToken(token)
+    let user = await userDB.findUserByToken(token)
     try {
       await spotify.pausePlayback(user.access_token)
       res.write('ok')
@@ -69,7 +73,7 @@ router.post('/api/playback/pause', async (req, res) => {
 router.post('/api/playback/play', async (req, res) => {
   if (req.headers.authorization !== undefined) {
     let token = getTokenFromAuthString(req.headers.authorization)
-    let user = userDB.findUserByToken(token)
+    let user = await userDB.findUserByToken(token)
     try {
       await spotify.startPlayback(user.access_token)
       res.write('ok')
@@ -106,7 +110,7 @@ router.get('/callback/', async (req, res, done, { url }) => {
   try {
     let userCode = await spotify.handleAccessToken(url.searchParams.get('code'))
     let userInfo = await spotify.getUserInfo(userCode.access_token)
-    let user = userDB.findUserById(userInfo.id)
+    let user = await userDB.findUserById(userInfo.id)
     if (user) {
       console.log('user already in db')
     } else {

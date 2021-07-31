@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "got": "^11.8.2",
-    "mime-types": "^2.1.31"
+    "mime-types": "^2.1.31",
+    "mongodb": "^4.0.1"
   },
   "devDependencies": {
     "eslint": "^7.30.0",
