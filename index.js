@@ -35,15 +35,15 @@ router.post('/api/token', async (req, res) => {
     req.on('end', async () => {
       const data = JSON.parse(Buffer.concat(chunks).toString())
       let token = createUserToken(data.uuid)
-      if (await userDB.findUserByUuid(data.uuid)) {
+      if (await userDB.findUser({ uuid: data.uuid })) {
         console.log('already registered')
         done()
       } else {
-        let user = await userDB.findUserById(data.login)
+        let user = await userDB.findUser({ id: data.login })
         console.log(user)
         if (user) {
           user.addDevice(data.uuid, token)
-          userDB.addDeviceById(user.id, { uuid: data.uuid, token })
+          userDB.addDevice(user.id, { uuid: data.uuid, token })
           res.write(`${token}`)
           console.log('registered new device', data.uuid)
         } else {
@@ -58,7 +58,7 @@ router.post('/api/token', async (req, res) => {
 router.post('/api/playback/pause', async (req, res) => {
   if (req.headers.authorization !== undefined) {
     let token = getTokenFromAuthString(req.headers.authorization)
-    let user = await userDB.findUserByToken(token)
+    let user = await userDB.findUser({ token })
     try {
       await spotify.pausePlayback(user.access_token)
       res.write('ok')
@@ -70,7 +70,7 @@ router.post('/api/playback/pause', async (req, res) => {
 router.post('/api/playback/play', async (req, res) => {
   if (req.headers.authorization !== undefined) {
     let token = getTokenFromAuthString(req.headers.authorization)
-    let user = await userDB.findUserByToken(token)
+    let user = await userDB.findUser({ token })
     try {
       await spotify.startPlayback(user.access_token)
       res.write('ok')
@@ -107,7 +107,7 @@ router.get('/callback/', async (req, res, done, { url }) => {
   try {
     let userCode = await spotify.handleAccessToken(url.searchParams.get('code'))
     let userInfo = await spotify.getUserInfo(userCode.access_token)
-    let user = await userDB.findUserById(userInfo.id)
+    let user = await userDB.findUser({ id: userInfo.id })
     if (user) {
       console.log('user already in db')
     } else {

@@ -22,16 +22,12 @@ const createConnection = (options) => {
     createUser: (user) => {
       _usersCollection.insertOne(user)
     },
-    findUserById: (id) => {
-      return _usersCollection.findOne({ id })
+    findUser: ({ id, token, uuid }) => {
+      if (id) return _usersCollection.findOne({ id })
+      if (token) return _usersCollection.findOne({ devices: { $elemMatch: { token } } })
+      if (uuid) return _usersCollection.findOne({ devices: { $elemMatch: { uuid } } })
     },
-    findUserByToken: (token) => {
-      return _usersCollection.findOne({ devices: { $elemMatch: { token } } })
-    },
-    findUserByUuid: (uuid) => {
-      return _usersCollection.findOne({ devices: { $elemMatch: { uuid } } })
-    },
-    addDeviceById: async (id, device) => {
+    addDevice: async (id, device) => {
       await _usersCollection.updateOne({ id }, { $push: { devices: device } }, options)
     },
   }

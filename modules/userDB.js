@@ -10,8 +10,12 @@ function create(mongodb) {
       mongodb.createUser(user)
       return user
     },
-    findUserById: async (id) => {
-      let res = await mongodb.findUserById(id)
+    findUser: async ({ id, token, uuid }) => {
+      let res
+      if (id) res = await mongodb.findUser({ id })
+      if (token) res = await mongodb.findUser({ token })
+      if (uuid) res = await mongodb.findUser({ uuid })
+
       if (res) {
         let user = new User({
           id: res.id,
@@ -22,18 +26,8 @@ function create(mongodb) {
         return user
       } else return false
     },
-    findUserByToken: async (token) => {
-      let res = await mongodb.findUserByToken(token)
-      if (res) return res
-      else return false
-    },
-    findUserByUuid: async (uuid) => {
-      let res = await mongodb.findUserByUuid(uuid)
-      if (res) return res
-      else return false
-    },
-    addDeviceById: async (id, device) => {
-      return mongodb.addDeviceById(id, device)
+    addDevice: async (id, device) => {
+      return mongodb.addDevice(id, device)
     },
   }
 }
