@@ -30,12 +30,8 @@ function user(user) {
     get devices() {
       return user.devices
     },
-    addDevice: (uuid, token) => {
-      user.devices.push({ uuid, token })
-    },
-    hasDeviceByToken: (token) => {
-      return user.devices.some((key) => key.token === token)
-    },
+    addDevice: (uuid, token) => user.devices.push({ uuid, token }),
+    hasDeviceByToken: (token) => user.devices.some((key) => key.token === token),
   }
 }
 

@@ -26,9 +26,7 @@ function create(mongodb) {
         return user
       } else return false
     },
-    addDevice: async (id, device) => {
-      return mongodb.addDevice(id, device)
-    },
+    addDevice: async (id, device) => mongodb.addDevice(id, device),
   }
 }
 

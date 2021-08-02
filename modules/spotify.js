@@ -1,15 +1,11 @@
 const spotifyApi = require('./spotifyApi')
 
 function unsetError(options) {
-  if (options instanceof Object) {
+  if (options instanceof Object)
     Object.keys(options).forEach((element) => {
-      if (options[element] === undefined) {
-        throw new Error(`${element} option must be set!`)
-      }
+      if (options[element] === undefined) throw new Error(`${element} option must be set!`)
     })
-  } else {
-    throw new Error('Must be an object')
-  }
+  else throw new Error('Must be an object')
 }
 
 function requestFactory(uri, expectedStatusCode, accessToken) {
@@ -56,18 +52,10 @@ function createApplication(options) {
         .catch((err) => reject(err))
     )
   }
-  const getUserInfo = (accessToken) => {
-    return requestFactory('/v1/me', 200, accessToken).get()
-  }
-  const getUserPlayback = (accessToken) => {
-    return requestFactory('/v1/me/player/currently-playing', 200, accessToken).get()
-  }
-  const pausePlayback = (accessToken) => {
-    return requestFactory('/v1/me/player/pause', 204, accessToken).put()
-  }
-  const startPlayback = (accessToken) => {
-    return requestFactory('/v1/me/player/play', 204, accessToken).put()
-  }
+  const getUserInfo = (accessToken) => requestFactory('/v1/me', 200, accessToken).get()
+  const getUserPlayback = (accessToken) => requestFactory('/v1/me/player/currently-playing', 200, accessToken).get()
+  const pausePlayback = (accessToken) => requestFactory('/v1/me/player/pause', 204, accessToken).put()
+  const startPlayback = (accessToken) => requestFactory('/v1/me/player/play', 204, accessToken).put()
   return { handleAccessToken, getUserInfo, getUserPlayback, pausePlayback, startPlayback }
 }
 

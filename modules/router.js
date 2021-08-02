@@ -13,21 +13,14 @@ function createApplication(options) {
   let routes = []
   let syncRoutes = []
   let postRoutes = []
+
   const _isStaticFile = (pathname) => {
     pathname = fspath.join(options.staticPath, pathname)
-    if (fs.existsSync(pathname) && fs.lstatSync(pathname).isFile()) {
-      return true
-    } else {
-      return false
-    }
+    if (fs.existsSync(pathname) && fs.lstatSync(pathname).isFile()) return true
+    else return false
   }
 
-  const _isPath = (path) => {
-    return routes.some((key) => key.path === path)
-  }
-  const _isSyncPath = (path) => {
-    return syncRoutes.some((key) => key.path === path)
-  }
+  const _isPathInArray = (pathArray, path) => pathArray.some((key) => key.path === path)
 
   const _serveStaticFile = (url, res, promiseArray) => {
     let path = url.pathname === '/' ? '/index.html' : url.pathname
@@ -36,9 +29,7 @@ function createApplication(options) {
         if (!err) {
           res.writeHead(200, { 'Content-Type': mime.lookup(path) })
           res.write(data)
-        } else {
-          res.writeHead(500, 'Internal Server Error')
-        }
+        } else res.writeHead(500, 'Internal Server Error')
       })
     )
   }
@@ -71,38 +62,30 @@ function createApplication(options) {
         }
         console.log(url.pathname)
 
-        if (_isPath(url.pathname)) {
+        if (_isPathInArray(routes, url.pathname)) {
           flag = 1
           _servePath(req, res, url, promiseArray)
         }
-        if (_isSyncPath(url.pathname)) {
+        if (_isPathInArray(syncRoutes, url.pathname)) {
           flag = 1
           await _serveSyncPath(req, res, url, promiseArray)
         }
         Promise.all(promiseArray).then(() => {
-          if (flag === 0) {
-            res.writeHead(404, 'Not found')
-          }
+          if (flag === 0) res.writeHead(404, 'Not found')
           res.end()
         })
       } else if (req.method === 'POST') {
         let url = new URL(req.url, req.protocol + '://' + req.headers.host + '/')
-        if (postRoutes.some((key) => key.path === url.pathname)) {
+        if (_isPathInArray(postRoutes, url.pathname)) {
           let func = postRoutes.find((key) => key.path === url.pathname)
           await func.func(req, res)
         }
         res.end()
       }
     },
-    get: (path, func) => {
-      routes.push({ path, func })
-    },
-    getSync: (path, func) => {
-      syncRoutes.push({ path, func })
-    },
-    post: (path, func) => {
-      postRoutes.push({ path, func })
-    },
+    get: (path, func) => routes.push({ path, func }),
+    getSync: (path, func) => syncRoutes.push({ path, func }),
+    post: (path, func) => postRoutes.push({ path, func }),
   }
 }
 

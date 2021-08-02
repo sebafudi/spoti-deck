@@ -80,10 +80,6 @@ router.post('/api/playback/play', async (req, res) => {
   }
 })
 
-router.get('/', (req, res, done) => {
-  done()
-})
-
 router.get('/login', (req, res, done) => {
   let scopes = 'user-read-currently-playing user-modify-playback-state'
   const authorization =
@@ -108,9 +104,8 @@ router.get('/callback/', async (req, res, done, { url }) => {
     let userCode = await spotify.handleAccessToken(url.searchParams.get('code'))
     let userInfo = await spotify.getUserInfo(userCode.access_token)
     let user = await userDB.findUser({ id: userInfo.id })
-    if (user) {
-      console.log('user already in db')
-    } else {
+    if (user) console.log('user already in db')
+    else {
       console.log('user not in db')
       user = userDB.newUser(userInfo.id, userCode.access_token, userCode.refresh_token)
     }
@@ -168,7 +163,7 @@ router.get('/test', (req, res, next) => {
 })
 
 http
-  .createServer(function (request, response) {
+  .createServer((request, response) => {
     router.route(request, response)
   })
   .listen(config.port)
