@@ -13,7 +13,7 @@ function requestFactory(uri, expectedStatusCode, accessToken) {
     get: () => {
       return new Promise((resolve, reject) =>
         spotifyApi
-          .makeRequest(uri, accessToken)
+          .get(uri, accessToken)
           .then(({ statusCode, body, statusMessage }) => {
             if (statusCode === expectedStatusCode) resolve(JSON.parse(body))
             else reject(statusCode + ' ' + statusMessage)

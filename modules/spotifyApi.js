@@ -17,7 +17,7 @@ const requestAccessToken = (clientCode, options) => {
     },
   })
 }
-const makeRequest = (url, accessToken) => {
+const get = (url, accessToken) => {
   return got(new URL(url, apiAddress), {
     headers: {
       Authorization: `Bearer  ${accessToken}`,
@@ -34,4 +34,4 @@ const put = (url, accessToken) => {
   })
 }
 
-module.exports = { requestAccessToken, makeRequest, put }
+module.exports = { requestAccessToken, get, put }
