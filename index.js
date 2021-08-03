@@ -25,7 +25,12 @@ function createUserToken(uuid) {
 
 function getTokenFromAuthString(str) {
   let reg = /(\S{64})$/gm
-  return reg.exec(str)[0]
+  let res = reg.exec(str)
+  if (res) {
+    return res[0]
+  } else {
+    return false
+  }
 }
 
 router.post('/api/token', async (req, res) => {
@@ -36,16 +41,13 @@ router.post('/api/token', async (req, res) => {
       const data = JSON.parse(Buffer.concat(chunks).toString())
       let token = createUserToken(data.uuid)
       if (await userDB.findUser({ uuid: data.uuid })) {
-        console.log('already registered')
         done()
       } else {
         let user = await userDB.findUser({ id: data.login })
-        console.log(user)
         if (user) {
           user.addDevice(data.uuid, token)
           userDB.addDevice(user.id, { uuid: data.uuid, token })
           res.write(`${token}`)
-          console.log('registered new device', data.uuid)
         } else {
           res.write('no user')
         }
@@ -55,30 +57,28 @@ router.post('/api/token', async (req, res) => {
   })
 })
 
-router.post('/api/playback/pause', async (req, res) => {
-  if (req.headers.authorization !== undefined) {
-    let token = getTokenFromAuthString(req.headers.authorization)
-    let user = await userDB.findUser({ token })
-    try {
-      await spotify.pausePlayback(user.access_token)
-      res.write('ok')
-    } catch (err) {
-      console.log(err)
+for (let x of ['play', 'pause']) {
+  router.post('/api/playback/' + x, async (req, res) => {
+    if (req.headers.authorization !== undefined) {
+      let token = getTokenFromAuthString(req.headers.authorization)
+      if (token) {
+        let user = await userDB.findUser({ token })
+        try {
+          if (x === 'pause') {
+            await spotify.pausePlayback(user.access_token)
+          } else if (x === 'play') {
+            await spotify.startPlayback(user.access_token)
+          }
+          res.write('ok')
+        } catch (err) {
+          res.writeHead(500)
+        }
+      } else {
+        res.writeHead(400)
+      }
     }
-  }
-})
-router.post('/api/playback/play', async (req, res) => {
-  if (req.headers.authorization !== undefined) {
-    let token = getTokenFromAuthString(req.headers.authorization)
-    let user = await userDB.findUser({ token })
-    try {
-      await spotify.startPlayback(user.access_token)
-      res.write('ok')
-    } catch (err) {
-      console.log(err)
-    }
-  }
-})
+  })
+}
 
 router.get('/login', (req, res, done) => {
   let scopes = 'user-read-currently-playing user-modify-playback-state'
@@ -104,11 +104,7 @@ router.get('/callback/', async (req, res, done, { url }) => {
     let userCode = await spotify.handleAccessToken(url.searchParams.get('code'))
     let userInfo = await spotify.getUserInfo(userCode.access_token)
     let user = await userDB.findUser({ id: userInfo.id })
-    if (user) console.log('user already in db')
-    else {
-      console.log('user not in db')
-      user = userDB.newUser(userInfo.id, userCode.access_token, userCode.refresh_token)
-    }
+    if (!user) user = userDB.newUser(userInfo.id, userCode.access_token, userCode.refresh_token)
     res.write(`User: <b>${user.id}</b><br />`)
     Promise.all([
       (async () => {
@@ -136,11 +132,6 @@ router.get('/callback/', async (req, res, done, { url }) => {
     res.write('</body>')
     done()
   }
-})
-
-router.get('/foo.png', (req, res, done) => {
-  console.log('foo')
-  done()
 })
 
 router.getSync('/test', (req, res, next) => {

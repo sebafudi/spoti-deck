@@ -7,14 +7,9 @@ const createConnection = (options) => {
     },
     options
   )
-  try {
-    var client = new MongoClient(options.uri)
-    client.connect()
-    var database = client.db(options.dbName)
-  } catch (err) {
-    console.log('Error connecting to mongodb server')
-    throw err
-  }
+  var client = new MongoClient(options.uri)
+  client.connect()
+  var database = client.db(options.dbName)
 
   const _usersCollection = database.collection('users')
 

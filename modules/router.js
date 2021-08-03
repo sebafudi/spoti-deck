@@ -63,8 +63,6 @@ function createApplication(options) {
           flag = 1
           _serveStaticFile(url, res, promiseArray)
         }
-        console.log(url.pathname)
-
         if (_isPathInArray(routes, url.pathname)) {
           flag = 1
           _servePath(req, res, url, promiseArray)
