@@ -1,5 +1,4 @@
-const fs = require('fs')
-const fsPromise = require('fs').promises
+const fs = require('fs').promises
 const fspath = require('path')
 const mime = require('mime-types')
 
@@ -14,10 +13,14 @@ function createApplication(options) {
   let syncRoutes = []
   let postRoutes = []
 
-  const _isStaticFile = (pathname) => {
-    pathname = fspath.join(options.staticPath, pathname)
-    if (fs.existsSync(pathname) && fs.lstatSync(pathname).isFile()) return true
-    else return false
+  const _isStaticFile = async (pathname) => {
+    try {
+      pathname = fspath.join(options.staticPath, pathname)
+      await (await fs.stat(pathname)).isFile()
+      return true
+    } catch (error) {
+      return false
+    }
   }
 
   const _isPathInArray = (pathArray, path) => pathArray.some((key) => key.path === path)
@@ -25,7 +28,7 @@ function createApplication(options) {
   const _serveStaticFile = (url, res, promiseArray) => {
     let path = url.pathname === '/' ? '/index.html' : url.pathname
     promiseArray.push(
-      fsPromise.readFile(fspath.join(options.staticPath, path)).then((data, err) => {
+      fs.readFile(fspath.join(options.staticPath, path)).then((data, err) => {
         if (!err) {
           res.writeHead(200, { 'Content-Type': mime.lookup(path) })
           res.write(data)
@@ -56,7 +59,7 @@ function createApplication(options) {
         let promiseArray = []
         let url = new URL(req.url, req.protocol + '://' + req.headers.host + '/')
 
-        if (_isStaticFile(url.pathname) || (url.pathname == '/' && _isStaticFile('/index.html'))) {
+        if ((await _isStaticFile(url.pathname)) || (url.pathname == '/' && _isStaticFile('/index.html'))) {
           flag = 1
           _serveStaticFile(url, res, promiseArray)
         }
