@@ -69,7 +69,13 @@ for (let x of ['play', 'pause']) {
           } else if (x === 'play') {
             await spotify.startPlayback(user.access_token)
           }
-          res.write('ok')
+          let playback = await spotify.getUserPlayback(user.access_token)
+          if (playback.is_playing === true) {
+            res.write('playing')
+          }
+          if (playback.is_playing === false) {
+            res.write('paused')
+          }
         } catch (err) {
           res.writeHead(500)
         }

@@ -37,6 +37,15 @@ function setLogin() {
 
 function pause() {
   var xhr = new XMLHttpRequest()
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      document.querySelector('.playbackStatus').innerHTML = xhr.response
+      if (xhr.response) {
+      } else {
+        document.querySelector('.playbackStatus').innerHTML = 'error'
+      }
+    }
+  }
   xhr.open('POST', '/api/playback/pause', true)
   xhr.setRequestHeader('Content-Type', 'application/json')
   xhr.setRequestHeader('Authorization', 'Bearer ' + sessionStorage.getItem('token'))
@@ -45,6 +54,15 @@ function pause() {
 
 function play() {
   var xhr = new XMLHttpRequest()
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      document.querySelector('.playbackStatus').innerHTML = xhr.response
+      if (xhr.response) {
+      } else {
+        document.querySelector('.playbackStatus').innerHTML = 'error'
+      }
+    }
+  }
   xhr.open('POST', '/api/playback/play', true)
   xhr.setRequestHeader('Content-Type', 'application/json')
   xhr.setRequestHeader('Authorization', 'Bearer ' + sessionStorage.getItem('token'))
