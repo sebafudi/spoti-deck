@@ -52,11 +52,24 @@ function createApplication(options) {
         .catch((err) => reject(err))
     )
   }
+  const refreshAccessToken = (refresh_token) => {
+    return new Promise((resolve, reject) =>
+      spotifyApi
+        .refreshAccessToken(refresh_token, options)
+        .then(({ statusCode, body, statusMessage }) => {
+          if (statusCode === 200) resolve(JSON.parse(body))
+          else reject(statusCode + ' ' + statusMessage)
+        })
+        .catch((err) => {
+          reject(err)
+        })
+    )
+  }
   const getUserInfo = (accessToken) => requestFactory('/v1/me', 200, accessToken).get()
   const getUserPlayback = (accessToken) => requestFactory('/v1/me/player/currently-playing', 200, accessToken).get()
   const pausePlayback = (accessToken) => requestFactory('/v1/me/player/pause', 204, accessToken).put()
   const startPlayback = (accessToken) => requestFactory('/v1/me/player/play', 204, accessToken).put()
-  return { handleAccessToken, getUserInfo, getUserPlayback, pausePlayback, startPlayback }
+  return { handleAccessToken, getUserInfo, getUserPlayback, pausePlayback, startPlayback, refreshAccessToken }
 }
 
 module.exports = createApplication

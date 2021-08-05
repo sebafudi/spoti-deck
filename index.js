@@ -111,6 +111,12 @@ router.get('/callback/', async (req, res, done, { url }) => {
     let userInfo = await spotify.getUserInfo(userCode.access_token)
     let user = await userDB.findUser({ id: userInfo.id })
     if (!user) user = userDB.newUser(userInfo.id, userCode.access_token, userCode.refresh_token)
+    else {
+      let res = await spotify.refreshAccessToken(user.refresh_token)
+      userDB.updateToken(user.id, res.access_token)
+      userInfo = await spotify.getUserInfo(userCode.access_token)
+      user = await userDB.findUser({ id: userInfo.id })
+    }
     res.write(`User: <b>${user.id}</b><br />`)
     Promise.all([
       (async () => {

@@ -21,6 +21,7 @@ const createConnection = (options) => {
       if (uuid) return _usersCollection.findOne({ devices: { $elemMatch: { uuid } } })
     },
     addDevice: async (id, device) => await _usersCollection.updateOne({ id }, { $push: { devices: device } }, options),
+    updateToken: (id, access_token) => _usersCollection.updateOne({ id }, { $set: { access_token } }),
   }
 }
 

@@ -17,6 +17,20 @@ const requestAccessToken = (clientCode, options) => {
     },
   })
 }
+
+const refreshAccessToken = (refresh_token, options) => {
+  let authString = options.clientId + ':' + options.clientSecret
+  return got.post(new URL('/api/token', tokenApiAddress), {
+    form: {
+      grant_type: 'refresh_token',
+      refresh_token,
+    },
+    headers: {
+      Authorization: `Basic ${Buffer.from(authString).toString('base64')}`,
+      'accept-encoding': '*',
+    },
+  })
+}
 const get = (url, accessToken) => {
   return got(new URL(url, apiAddress), {
     headers: {
@@ -34,4 +48,4 @@ const put = (url, accessToken) => {
   })
 }
 
-module.exports = { requestAccessToken, get, put }
+module.exports = { requestAccessToken, get, put, refreshAccessToken }

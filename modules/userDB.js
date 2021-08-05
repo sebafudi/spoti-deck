@@ -27,6 +27,7 @@ function create(mongodb) {
       } else return false
     },
     addDevice: async (id, device) => mongodb.addDevice(id, device),
+    updateToken: async (id, access_token) => mongodb.updateToken(id, access_token),
   }
 }
 
