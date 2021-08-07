@@ -33,6 +33,11 @@ function setUuid() {
 
 function setLogin() {
   sessionStorage.setItem('login', document.querySelector('.loginInput').value)
+  if (document.querySelector('.loginInput').value) {
+    document.querySelector('.registerButton').disabled = false
+  } else {
+    document.querySelector('.registerButton').disabled = true
+  }
 }
 
 function pause() {
@@ -82,4 +87,7 @@ let token = sessionStorage.getItem('token')
 if (token) document.querySelector('.tokenInput').value = token
 
 let login = sessionStorage.getItem('login')
-if (login) document.querySelector('.loginInput').value = login
+if (login) {
+  document.querySelector('.loginInput').value = login
+  document.querySelector('.registerButton').disabled = false
+}

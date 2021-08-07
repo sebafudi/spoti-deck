@@ -6,38 +6,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css" />
     <title>spoti-deck</title>
+    <style>
+      html {
+        overflow-y: auto;
+      }
+      .main {
+        height: 100vh;
+      }
+    </style>
   </head>
   <body>
-    <div class="container">
-      <div class="columns">
-        <div class="column is-full">
-          <h1 class="title">spoti-deck</h1>
+    <div class="main section has-background-dark has-text-light">
+      <div class="container">
+        <div class="columns">
+          <div class="column is-full">
+            <h1 class="title has-text-white-ter m-auto">spoti-deck</h1>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="container">
-      <div class="columns">
-        <div class="column">
-          <h3 class="full-width center">Website</h3>
-          <div class="box">
-            <a href="/login"><button>Login</button></a>
+      <div class="container">
+        <div class="columns">
+          <div class="column">
+            <div class="box has-background-grey-dark">
+              <a href="/login" class="button is-success">Login</a>
+            </div>
+            <div class="box has-background-grey-dark">
+              <div class="field">
+                <div class="control">
+                  <input type="text" class="loginInput input is-success" placeholder="Spotify login" />
+                </div>
+              </div>
+              <div class="field is-grouped">
+                <div class="control">
+                  <button onclick="setLogin()" class="button is-success">SET LOGIN</button>
+                </div>
+                <div class="control">
+                  <button onclick="getToken()" class="registerButton button is-success" disabled>
+                    Register device
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="box has-background-grey-dark">
+              <div class="field is-grouped">
+                <div class="control">
+                  <button onclick="play()" class="button is-success">Play</button>
+                </div>
+                <div class="control">
+                  <button onclick="pause()" class="button is-danger">Pause</button>
+                </div>
+              </div>
+              <div class="playbackStatus has-text-light">----</div>
+            </div>
           </div>
-        </div>
-        <div class="column">
-          <h3 class="">Device</h3>
-          <div class="box">
-            <input type="text" class="uuidInput input" />
-            <button onclick="setUuid()" class="button">SET UUID</button>
-            <input type="text" class="loginInput input" />
-            <button onclick="setLogin()" class="button">SET LOGIN</button>
-            <button onclick="getToken()" class="button">Register device</button>
-            <input type="text" placeholder="token" class="tokenInput input" />
-            <button onclick="setToken()" class="button">SET TOKEN</button>
-          </div>
-          <div class="box">
-            <button onclick="play()" class="button is-success">Play</button>
-            <button onclick="pause()" class="button is-danger">Pause</button>
-            <div class="playbackStatus">----</div>
+          <div class="column">
+            <div class="box has-background-grey-dark">
+              <div class="field">
+                <label class="label has-text-light">Device UUID</label>
+                <div class="control">
+                  <input type="text" class="uuidInput input is-danger" placeholder="uuid" />
+                </div>
+              </div>
+              <div class="field">
+                <div class="control">
+                  <button onclick="setUuid()" class="button is-danger">SET UUID</button>
+                </div>
+              </div>
+              <div class="field">
+                <div class="control">
+                  <input type="text" placeholder="token" class="tokenInput input is-danger" />
+                </div>
+              </div>
+              <div class="field">
+                <div class="control">
+                  <button onclick="setToken()" class="button is-danger">SET TOKEN</button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
