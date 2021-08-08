@@ -17,10 +17,10 @@
   </head>
   <body>
     <div class="main section has-background-dark has-text-light">
-      <div class="container">
+      <div class="container box has-background-grey-dark">
         <div class="columns">
           <div class="column is-full">
-            <h1 class="title has-text-white-ter m-auto">spoti-deck</h1>
+            <h1 class="title has-text-white-ter has-text-centered">spoti-deck</h1>
           </div>
         </div>
       </div>
@@ -28,17 +28,21 @@
         <div class="columns">
           <div class="column">
             <div class="box has-background-grey-dark">
-              <a href="/login" class="button is-success">Login</a>
+              <label class="label has-text-light">Login to Your Spotify account</label>
+              <div class="control">
+                <a href="/login" class="button is-success">Login</a>
+              </div>
             </div>
             <div class="box has-background-grey-dark">
               <div class="field">
+                <label class="label has-text-light">Spotify account to control</label>
                 <div class="control">
-                  <input type="text" class="loginInput input is-success" placeholder="Spotify login" />
+                  <input type="text" class="loginInput input is-success" placeholder="login" />
                 </div>
               </div>
               <div class="field is-grouped">
                 <div class="control">
-                  <button onclick="setLogin()" class="button is-success">SET LOGIN</button>
+                  <button onclick="setLogin()" class="button is-success">Set</button>
                 </div>
                 <div class="control">
                   <button onclick="getToken()" class="registerButton button is-success" disabled>
@@ -48,6 +52,7 @@
               </div>
             </div>
             <div class="box has-background-grey-dark">
+              <label class="label has-text-light">Control Playback</label>
               <div class="field is-grouped">
                 <div class="control">
                   <button onclick="play()" class="button is-success">Play</button>
@@ -73,6 +78,7 @@
                 </div>
               </div>
               <div class="field">
+                <label class="label has-text-light">Login Token</label>
                 <div class="control">
                   <input type="text" placeholder="token" class="tokenInput input is-danger" />
                 </div>
