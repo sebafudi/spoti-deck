@@ -1,26 +1,45 @@
-function getToken() {
-  var xhr = new XMLHttpRequest()
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === 4) {
-      if (xhr.response === 'no user') {
-        console.log('no user')
-        sessionStorage.setItem('token', '')
-        document.querySelector('.tokenInput').value = ''
-      } else if (xhr.response) {
-        console.log(xhr.response)
-        sessionStorage.setItem('token', xhr.response)
-        document.querySelector('.tokenInput').value = xhr.response
-      } else console.log('Already registered')
+function makeRequest(url, options) {
+  return new Promise((resolve, reject) => {
+    options = Object.assign(
+      {
+        method: 'GET',
+        contentType: 'application/json',
+        payload: '',
+        authorization: '',
+      },
+      options
+    )
+    let xhr = new XMLHttpRequest()
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        resolve(xhr.response)
+      }
     }
-  }
-  xhr.open('POST', '/api/token', true)
-  xhr.setRequestHeader('Content-Type', 'application/json')
-  xhr.send(
-    JSON.stringify({
-      uuid: sessionStorage.getItem('uuid'),
-      login: sessionStorage.getItem('login'),
-    })
-  )
+    xhr.open(options.method, url, true)
+    xhr.setRequestHeader('Content-Type', options.contentType)
+    xhr.setRequestHeader('Authorization', options.authorization)
+    xhr.send(options.payload)
+  })
+}
+
+async function getToken() {
+  let payload = JSON.stringify({
+    uuid: sessionStorage.getItem('uuid'),
+    login: sessionStorage.getItem('login'),
+  })
+  let response = await makeRequest('api/token', {
+    method: 'POST',
+    payload,
+  })
+  if (response === 'no user') {
+    console.log('no user')
+    sessionStorage.setItem('token', '')
+    document.querySelector('.tokenInput').value = ''
+  } else if (response) {
+    console.log(response)
+    sessionStorage.setItem('token', response)
+    document.querySelector('.tokenInput').value = response
+  } else console.log('Already registered')
 }
 
 function setToken() {
@@ -40,38 +59,28 @@ function setLogin() {
   }
 }
 
-function pause() {
-  var xhr = new XMLHttpRequest()
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === 4) {
-      document.querySelector('.playbackStatus').innerHTML = xhr.response
-      if (xhr.response) {
-      } else {
-        document.querySelector('.playbackStatus').innerHTML = 'error'
-      }
-    }
+async function pause() {
+  let response = await makeRequest('api/playback/pause', {
+    method: 'POST',
+    authorization: 'Bearer ' + sessionStorage.getItem('token'),
+  })
+  document.querySelector('.playbackStatus').innerHTML = response
+  if (response) {
+  } else {
+    document.querySelector('.playbackStatus').innerHTML = 'error'
   }
-  xhr.open('POST', '/api/playback/pause', true)
-  xhr.setRequestHeader('Content-Type', 'application/json')
-  xhr.setRequestHeader('Authorization', 'Bearer ' + sessionStorage.getItem('token'))
-  xhr.send()
 }
 
-function play() {
-  var xhr = new XMLHttpRequest()
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === 4) {
-      document.querySelector('.playbackStatus').innerHTML = xhr.response
-      if (xhr.response) {
-      } else {
-        document.querySelector('.playbackStatus').innerHTML = 'error'
-      }
-    }
+async function play() {
+  let response = await makeRequest('api/playback/play', {
+    method: 'POST',
+    authorization: 'Bearer ' + sessionStorage.getItem('token'),
+  })
+  document.querySelector('.playbackStatus').innerHTML = response
+  if (response) {
+  } else {
+    document.querySelector('.playbackStatus').innerHTML = 'error'
   }
-  xhr.open('POST', '/api/playback/play', true)
-  xhr.setRequestHeader('Content-Type', 'application/json')
-  xhr.setRequestHeader('Authorization', 'Bearer ' + sessionStorage.getItem('token'))
-  xhr.send()
 }
 
 let uuid = sessionStorage.getItem('uuid')
