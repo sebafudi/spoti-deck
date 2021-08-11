@@ -1,3 +1,5 @@
+Legacy, no longer in developement. Active project https://github.com/sebafudi/musicdesk
+<br /><br /><br />
 # spoti-deck
 Phisical deck to control Your Spotify playback.<br />
 This repository is mainly backend for connecting to Spotify API and receiving requests from devices.<br />
